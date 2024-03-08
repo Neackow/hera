@@ -20,7 +20,10 @@
     Args :: term().
 
 start_measure(Module, Args) ->
-    hera_measure_sup:start_child(Module, Args).
+
+    io:format("hera:start_measure has been reached!~n"),
+
+    hera_measure_sup:start_child(Module, Args). % In hera_measure_sup, this leads to supervisor:start_child(?MODULE, [nav3, Cn]). 
 
 
 -spec timestamp() -> timestamp().

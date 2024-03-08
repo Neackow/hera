@@ -45,27 +45,45 @@ start_link(Module, Args) ->
 %% Internal functions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% In hera_measure, this starts the init function and calls e11:init(R0), e.g.
+
 init({Mod, Args}) ->
-    {ok, ModState, Spec} = Mod:init(Args),
+
+    io:format("A hera_measure process is being init!~n"),
+
+    {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
     L1 = lists:map(fun({Key, Val}) -> maps:get(Key, Spec, Val) end, L0),
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
     case State#state.sync of
         true ->
-            PidRef = subscribe(State#state.name),
+
+            io:format("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n"),
+
+            PidRef = subscribe(State#state.name), % Here, we have a subscription. The process is monitored.
             NewState =
                 State#state{seq=Seq,mod=Mod,mod_state=ModState,monitor=PidRef},
             loop(NewState, true);
         false ->
+
+            io:format("In hera_measure:init, in the false condition on State#state.sync)!~n"),
+
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
             loop(NewState, false)
     end.
 
 
 loop(State, false) ->
+
+    io:format("hera_measure:loop with false condition has been reached!~n"),
+
     continue(measure(State));
+
 loop(State=#state{monitor={From,Ref}}, true) ->
+
+    io:format("hera_measure:loop with true condition has been reached!~n"),
+
     receive
         {authorized, From} ->
             NewState = measure(State),
@@ -79,6 +97,7 @@ loop(State=#state{monitor={From,Ref}}, true) ->
 
 continue(#state{iter=0}) ->
     {stop, normal};
+
 continue(State) ->
     timer:sleep(State#state.timeout),
     loop(State, State#state.sync).
@@ -87,6 +106,9 @@ continue(State) ->
 subscribe(Name) ->
     {ok, Pid} = hera_sub:subscribe(Name),
     Ref = monitor(process, Pid),
+
+    io:format("Process subscribed (hera_measure)!~n"),
+
     {Pid, Ref}.
 
 
@@ -103,11 +125,20 @@ init_seq(Name) ->
 
 
 measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
+
+    io:format("hera_measure:measure has been reached!~n"),
+
     case M:measure(MS) of
         {undefined, NewMS} ->
+
+            io:format("hera_measure:measure received an undefined response from M:measure(MS)!~n"),
+
             State#state{mod_state=NewMS};
         {ok, Vals=[_|_], NewMS} ->
-            hera_com:send(N, Seq, Vals),
+
+            io:format("Sending to hera_com from hera_measure!~n"),
+
+            hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
             NewIter = case Iter of
                 infinity -> Iter;
                 _ -> Iter-1

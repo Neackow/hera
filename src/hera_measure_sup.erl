@@ -16,7 +16,16 @@ start_link() ->
 
 
 start_child(Module, Args) ->
+
+    io:format("hera_measure_sup:start_child has been reached!~n"),
+    
     supervisor:start_child(?MODULE, [Module, Args]).
+
+% The child process is started by using the start function as defined in the child specification (if not simple_one_for_one).
+% Here, it is a simple_one_for_one. The child specification defined in Module:init/1 is used (which is "hera_measure"), and ChildSpec must instead be an arbitrary list of terms List. 
+% The child process is then started by appending List to the existing start function arguments, that is, by calling apply(M, F, A++List), where {M,F,A} is the start function defined 
+% in the child specification.
+% So, a hera_measure is launched.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Callbacks

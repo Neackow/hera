@@ -50,7 +50,10 @@ get(Name, Node) ->
     Values :: [number(), ...].
 
 store(Name, Node, Seq, Values) ->
-    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).
+
+    io:format("hera_data:store has been reached!~n"),
+
+    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).  % This is a typical cast call, which is handled by handle_cast.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Callbacks
@@ -82,8 +85,12 @@ handle_call(_Request, _From, State) ->
 
 
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
+
+    io:format("hera_data:store is being handled by handle_cast!~n"),
+
+
     MapNode0 = maps:get(Name, MapData, #{}),
-    IsLogger = application:get_env(hera, log_data, false),
+    IsLogger = application:get_env(hera, log_data, false), % Here, due to the fact that we defined true in the configuration files, IsLogger should be false.
     MapNode1 = if
         is_map_key(Node, MapNode0) ->
             MapNode0;
@@ -97,7 +104,11 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
     MapNode2 = case Data of
         #data{seq=Seq0} when Seq0 < Seq1 ->
             T = hera:timestamp(),
-            log_data(Data#data.file, {Seq1, T, L}, IsLogger),
+
+            io:format("hera_data:handle_cast is calling log_data!~n"),
+
+
+            log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
             NewData = Data#data{seq=Seq1,values=L,timestamp=T},
             maps:put(Node, NewData, MapNode1);
         _ ->
@@ -118,10 +129,23 @@ file_name(Name, Node) ->
 
 
 log_data(_, _, false) ->
+
+    io:format("FALSE VERSION of hera_data:log_data has been reached!~n"),
+
     ok;
+
 log_data(File, {Seq, T, Ms}, true) ->
+
+    io:format("hera_data:log_data has been reached!~n"),
+
     Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
     S = string:join(Vals, ","),
     Bytes = io_lib:format("~p,~p,~s~n", [Seq, T, S]),
+
+    io:format("hera_data:log_data should be verifying that measures/ exists or will create it!~n"),
+
     ok = filelib:ensure_dir("measures/"),
+
+    io:format("hera_data:log_data should be writting!~n"),
+
     ok = file:write_file(File, Bytes, [append]).
