@@ -90,7 +90,9 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
 
     MapNode0 = maps:get(Name, MapData, #{}),
-    IsLogger = application:get_env(hera, log_data, true), % Here, due to the fact that we defined true in the configuration files, IsLogger should be false.
+    IsLogger = application:get_env(hera, log_data, true), 
+    % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
+    io:format("Coucou~n"),
     io:format("IsLogger is ~p~n~n~n", [IsLogger]),
     MapNode1 = if
         is_map_key(Node, MapNode0) ->
