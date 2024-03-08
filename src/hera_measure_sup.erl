@@ -19,9 +19,9 @@ start_child(Module, Args) ->
 
     io:format("hera_measure_sup:start_child has been reached!~n"),
 
-    supervisor:start_child(?MODULE, [Module, Args]),
+    Local_child = supervisor:start_child(?MODULE, [Module, Args]),
 
-    io:format(supervisor:start_child(?MODULE, [Module, Args])).
+    io:format("Return of start_child: ~p~n", [Local_child]).
 
 % The child process is started by using the start function as defined in the child specification (if not simple_one_for_one).
 % Here, it is a simple_one_for_one. The child specification defined in Module:init/1 is used (which is "hera_measure"), and ChildSpec must instead be an arbitrary list of terms List. 

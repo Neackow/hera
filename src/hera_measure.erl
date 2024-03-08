@@ -38,6 +38,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start_link(Module, Args) ->
+
+    io:format("Hey, I'm hera_measure, this is my start_link function!~n"),
+
     Pid = spawn_link(fun() -> init({Module, Args}) end),
     {ok, Pid}.
 
