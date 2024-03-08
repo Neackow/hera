@@ -87,9 +87,9 @@ handle_call(_Request, _From, State) ->
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
     io:format("hera_data:store is being handled by handle_cast!~n"),
-
-
+    
     MapNode0 = maps:get(Name, MapData, #{}),
+    io:format("hera_data:MapNode0 used~n"),
     IsLogger = application:get_env(hera, log_data, true), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
     io:format("Coucou~n"),
