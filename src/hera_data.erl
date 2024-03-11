@@ -18,6 +18,17 @@
     file :: string() | undefined
 }).
 
+% Decide whether or not to print the comments. Remember to change it in your environment.
+output_log(Message, Args=[]) ->
+    ShowLogs = application:get_env(hera, show_log, false), 
+    if 
+        ShowLogs -> 
+            io:format(Message,Args);
+        true -> 
+            ok
+    end.
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -51,7 +62,8 @@ get(Name, Node) ->
 
 store(Name, Node, Seq, Values) ->
 
-    io:format("hera_data:store has been reached!~n"),
+    % For debugging purposes:
+    output_log("hera_data:store has been reached!~n",[]),
 
     gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).  % This is a typical cast call, which is handled by handle_cast.
 
@@ -86,12 +98,13 @@ handle_call(_Request, _From, State) ->
 
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
-    io:format("hera_data:store is being handled by handle_cast!~n"),
+    % For debugging purposes:
+    output_log("hera_data:store is being handled by handle_cast!~n",[]),
     
     MapNode0 = maps:get(Name, MapData, #{}),
     IsLogger = application:get_env(hera, log_data, true), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
-    io:format("IsLogger is ~p~n~n~n", [IsLogger]),
+    % io:format("IsLogger is ~p~n~n~n", [IsLogger]),
     MapNode1 = if
         is_map_key(Node, MapNode0) ->
             MapNode0;
@@ -106,8 +119,8 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
         #data{seq=Seq0} when Seq0 < Seq1 ->
             T = hera:timestamp(),
 
-            io:format("hera_data:handle_cast is calling log_data!~n"),
-
+            % For debugging purposes:
+            output_log("hera_data:handle_cast is calling log_data!~n",[]),
 
             log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
             NewData = Data#data{seq=Seq1,values=L,timestamp=T},
@@ -131,22 +144,26 @@ file_name(Name, Node) ->
 
 log_data(_, _, false) ->
 
-    io:format("FALSE VERSION of hera_data:log_data has been reached!~n"),
+    % For debugging purposes:
+    output_log("FALSE VERSION of hera_data:log_data has been reached!~n",[]),
 
     ok;
 
 log_data(File, {Seq, T, Ms}, true) ->
 
-    io:format("hera_data:log_data has been reached!~n"),
+    % For debugging purposes:
+    output_log("hera_data:log_data has been reached!~n",[]),
 
     Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
     S = string:join(Vals, ","),
     Bytes = io_lib:format("~p,~p,~s~n", [Seq, T, S]),
 
-    io:format("hera_data:log_data should be verifying that measures/ exists or will create it!~n"),
+    % For debugging purposes:
+    output_log("hera_data:log_data should be verifying that measures/ exists or will create it!~n",[]),
 
     ok = filelib:ensure_dir("measures/"),
 
-    io:format("hera_data:log_data should be writting!~n"),
+    % For debugging purposes:
+    output_log("hera_data:log_data should be writting!~n",[]),
 
     ok = file:write_file(File, Bytes, [append]).
