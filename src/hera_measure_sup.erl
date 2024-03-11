@@ -63,3 +63,6 @@ init([]) ->
     },
     ChildSpecs = [HeraMeasure],
     {ok, {SupFlags, ChildSpecs}}.
+
+% The last part of the RestartStrategy tuple is the couple of variables MaxRestart and MaxTime. The idea is basically that if more than MaxRestarts happen within MaxTime (in seconds),
+% the supervisor just gives up on your code, shuts it down then kills itself to never return

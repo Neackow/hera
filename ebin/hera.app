@@ -4,7 +4,7 @@
               {registered,[hera_data,hera_com,hera_measure_sup]},
               {mod,{hera,[]}},
               {applications,[kernel,stdlib]},
-              {env,[{log_data,true},{show_log,false}]},
+              {env,[{log_data,true},{show_log,false},{show_log_spec,true}]},
               {modules,[hera,hera_com,hera_data,hera_measure,hera_measure_sup,
                         hera_sup,kalman,mat]},
               {licenses,["Apache 2.0"]},
