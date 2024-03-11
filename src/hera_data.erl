@@ -105,7 +105,7 @@ handle_call({get, Name}, _From, MapData) ->
 
 handle_call({get, Name, Node}, _From, MapData) ->
 
-    % For debugging purposes.
+    % For debugging purposes. Specific function call to only have these comments.
     output_log_spec("hera_data:handle_call (Name,Node version) has been reached! Dealing with it.~n",[]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
@@ -120,7 +120,7 @@ handle_call({get, Name, Node}, _From, MapData) ->
         true ->
             []
     end,
-    output_log_spec("Is the reply taking 5secs?~n",[]),
+    output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
 
     {reply, Res, MapData};
 
