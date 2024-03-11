@@ -33,13 +33,28 @@
 -define(record_to_tuplelist(Name, Rec),
     lists:zip(record_info(fields, Name), tl(tuple_to_list(Rec)))).
 
+
+
+% Decide whether or not to print the comments. Remember to change it in your environment.
+output_log(Message, Args=[]) ->
+    ShowLogs = application:get_env(hera, show_log, false), 
+    if 
+        ShowLogs -> 
+            io:format(Message,Args);
+        true -> 
+            ok
+    end.
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 start_link(Module, Args) ->
 
-    io:format("Hey, I'm hera_measure, this is my start_link function!~n"),
+    % For debugging purposes.
+    output_log("Hey, I'm hera_measure, this is my start_link function!~n",[]),
 
     Pid = spawn_link(fun() -> init({Module, Args}) end),
     {ok, Pid}.
@@ -52,7 +67,8 @@ start_link(Module, Args) ->
 
 init({Mod, Args}) ->
 
-    io:format("A hera_measure process is being init!~n"),
+    % For debugging purposes.
+    output_log("A hera_measure process is being init!~n",[]),
 
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
@@ -61,8 +77,9 @@ init({Mod, Args}) ->
     Seq = init_seq(State#state.name),
     case State#state.sync of
         true ->
-
-            io:format("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n"),
+            
+            % For debugging purposes.
+            output_log("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
 
             PidRef = subscribe(State#state.name), % Here, we have a subscription. The process is monitored.
             NewState =
@@ -70,7 +87,8 @@ init({Mod, Args}) ->
             loop(NewState, true);
         false ->
 
-            io:format("In hera_measure:init, in the false condition on State#state.sync)!~n"),
+            % For debugging purposes.
+            output_log("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
             loop(NewState, false)
@@ -79,13 +97,15 @@ init({Mod, Args}) ->
 
 loop(State, false) ->
 
-    io:format("hera_measure:loop with false condition has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_measure:loop with false condition has been reached!~n",[]),
 
     continue(measure(State));
 
 loop(State=#state{monitor={From,Ref}}, true) ->
 
-    io:format("hera_measure:loop with true condition has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_measure:loop with true condition has been reached!~n",[]),
 
     receive
         {authorized, From} ->
@@ -110,7 +130,8 @@ subscribe(Name) ->
     {ok, Pid} = hera_sub:subscribe(Name),
     Ref = monitor(process, Pid),
 
-    io:format("Process subscribed (hera_measure)!~n"),
+    % For debugging purposes.
+    output_log("Process subscribed (hera_measure)!~n",[]),
 
     {Pid, Ref}.
 
@@ -129,17 +150,20 @@ init_seq(Name) ->
 
 measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
 
-    io:format("hera_measure:measure has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_measure:measure has been reached!~n",[]),
 
     case M:measure(MS) of
         {undefined, NewMS} ->
 
-            io:format("hera_measure:measure received an undefined response from M:measure(MS)!~n"),
+            % For debugging purposes.
+            output_log("hera_measure:measure received an undefined response from M:measure(MS)!~n",[]),
 
             State#state{mod_state=NewMS};
         {ok, Vals=[_|_], NewMS} ->
 
-            io:format("Sending to hera_com from hera_measure!~n"),
+            % For debugging purposes.
+            output_log("Sending to hera_com from hera_measure!~n",[]),
 
             hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
             NewIter = case Iter of

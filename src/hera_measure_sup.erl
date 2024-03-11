@@ -7,6 +7,20 @@
 
 -export([init/1]).
 
+
+
+% Decide whether or not to print the comments. Remember to change it in your environment.
+output_log(Message, Args=[]) ->
+    ShowLogs = application:get_env(hera, show_log, false), 
+    if 
+        ShowLogs -> 
+            io:format(Message,Args);
+        true -> 
+            ok
+    end.
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -17,12 +31,14 @@ start_link() ->
 
 start_child(Module, Args) ->
 
-    io:format("hera_measure_sup:start_child has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_measure_sup:start_child has been reached!~n",[]),
 
-    Local_child = supervisor:start_child(?MODULE, [Module, Args]),
+    supervisor:start_child(?MODULE, [Module, Args]).
 
-    io:format("Return of start_child: ~p~n", [Local_child]),
-    Local_child.
+    %Local_child = supervisor:start_child(?MODULE, [Module, Args]),
+    %io:format("Return of start_child: ~p~n", [Local_child]),
+    %Local_child.
 
 % The child process is started by using the start function as defined in the child specification (if not simple_one_for_one).
 % Here, it is a simple_one_for_one. The child specification defined in Module:init/1 is used (which is "hera_measure"), and ChildSpec must instead be an arbitrary list of terms List. 

@@ -6,6 +6,20 @@
 -define(MULTICAST_ADDR, {224,0,2,15}).
 -define(MULTICAST_PORT, 62476).
 
+
+
+% Decide whether or not to print the comments. Remember to change it in your environment.
+output_log(Message, Args=[]) ->
+    ShowLogs = application:get_env(hera, show_log, false), 
+    if 
+        ShowLogs -> 
+            io:format(Message,Args);
+        true -> 
+            ok
+    end.
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% API
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -23,7 +37,8 @@ start_link() ->
 
 send(Name, Seq, Values) ->
 
-    io:format("hera_com:send has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_com:send has been reached!~n",[]),
 
     Message = {hera_data, Name, node(), Seq, Values},
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
@@ -73,18 +88,21 @@ open_socket() ->
 
 loop(Socket) ->
 
-    io:format("hera_com:loop has been reached!~n"),
+    % For debugging purposes.
+    output_log("hera_com:loop has been reached!~n",[]),
 
     receive
         {udp, _Sock, _IP, _InPortNo, Packet} ->     % Eventually, we receive the data. This in term calls the store function from hera_data.
             
-            io:format("I am hera_com:loop(Socket) and I received an udp message!~n"),
+            % For debugging purposes.
+            output_log("I am hera_com:loop(Socket) and I received an udp message!~n",[]),
             
             Message = binary_to_term(Packet),
             case Message of
                 {hera_data, Name, From, Seq, Values} ->
 
-                    io:format("I am hera_com:loop(Socket) and I am trying to store data!~n"),
+                    % For debugging purposes.
+                    output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
                     hera_data:store(Name, From, Seq, Values);
                 _ ->
@@ -92,7 +110,8 @@ loop(Socket) ->
             end;
         {send_packet, Packet} -> % A priori, from the initial call, we get here. This sends the data to all connected node, apparently. Thus, to self too.
             
-            io:format("I am hera_com:loop(Socket) and I received a send_packet message!~n"),
+            % For debugging purposes.
+            output_log("I am hera_com:loop(Socket) and I received a send_packet message!~n",[]),
             
             gen_udp:send(Socket, ?MULTICAST_ADDR, ?MULTICAST_PORT, Packet);
         _ ->
