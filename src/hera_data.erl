@@ -35,7 +35,7 @@ output_log_spec(Message, Args) ->
     if 
         ShowLogs -> 
             if Args == [] -> 
-                io:format(Message + "args = null~n");
+                io:format("~nArgs = null~n");
                true -> 
                 io:format(Message, Args)
             end;
