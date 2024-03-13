@@ -20,7 +20,7 @@
 
 
 % Decide whether or not to print the comments. Remember to change it in your environment.
-output_log(Message, Args=[]) ->
+output_log(Message, Args) ->
     ShowLogs = application:get_env(hera, show_log, false), 
     if 
         ShowLogs -> 
@@ -30,11 +30,15 @@ output_log(Message, Args=[]) ->
     end.
 
 % Decide whether or not to print the comments. Remember to change it in your environment.
-output_log_spec(Message, Args=[]) ->
+output_log_spec(Message, Args) ->
     ShowLogs = application:get_env(hera, show_log_spec, false), 
     if 
         ShowLogs -> 
-            io:format(Message,Args);
+            if Args == [] -> 
+                io:format(Message + "args = null~n");
+               true -> 
+                io:format(Message, Args)
+            end;
         true -> 
             ok
     end.
