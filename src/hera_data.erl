@@ -121,6 +121,7 @@ handle_call({get, Name, Node}, _From, MapData) ->
             []
     end,
     output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
+    output_log_spec("~n~n I am MapData: ~p~n~n",[MapData]),
 
     {reply, Res, MapData};
 
