@@ -93,13 +93,13 @@ init([]) ->
 handle_call({get, Name}, _From, MapData) ->
 
     % For debugging purposes.
-    output_log_spec("hera_data:handle_call (Name alone version) has been reached! Dealing with it.~n",["Default"]),
+    output_log_spec("hera_data:handle_call (Name alone version) has been reached! Dealing with it. ~p~n",["ok"]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
-    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs?~n",["Default"]),
+    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~p~n",["ok"]),
 
     L = maps:to_list(MapMeasure),
-    output_log_spec("Is L = maps:to_list(MapMeasure) taking 5secs?~n",["Default"]),
+    output_log_spec("Is L = maps:to_list(MapMeasure) taking 5secs? ~p~n",["ok"]),
 
     Res = [{Node,S,T,V} || {Node, #data{seq=S,values=V,timestamp=T}} <- L],
     output_log_spec("Is the reply taking 5secs?~n",[]),
@@ -110,15 +110,15 @@ handle_call({get, Name}, _From, MapData) ->
 handle_call({get, Name, Node}, _From, MapData) ->
 
     % For debugging purposes. Specific function call to only have these comments.
-    output_log_spec("hera_data:handle_call (Name,Node version) has been reached! Dealing with it.~n",["Default"]),
+    output_log_spec("hera_data:handle_call (Name,Node version) has been reached! Dealing with it. ~p~n",["ok"]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
-    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs?~n",["Default"]),
+    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~p~n",["ok"]),
 
     Res = if
         is_map_key(Node, MapMeasure) ->
             #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure),
-            output_log_spec("Is #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure) from is_map_key(Node, MapMeasuer) taking 5secs?~n",["Default"]),
+            output_log_spec("Is #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure) from is_map_key(Node, MapMeasuer) taking 5secs? ~p~n",["ok"]),
 
             [{Node,S,T,V}];
         true ->
