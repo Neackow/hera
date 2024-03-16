@@ -51,7 +51,7 @@ output_log_spec(Message, Args) ->
     if 
         ShowLogs -> 
             if Args == [] -> 
-                io:format("~nArgs = null~n");
+                io:format(Message);
                true -> 
                 io:format(Message, Args)
             end;
@@ -68,7 +68,7 @@ output_log_spec(Message, Args) ->
 start_link(Module, Args) ->
 
     % For debugging purposes.
-    output_log("Hey, I'm hera_measure, this is my start_link function!~n",[]),
+    output_log_spec("Hey, I'm hera_measure, this is my start_link function!~n",[]),
 
     Pid = spawn_link(fun() -> init({Module, Args}) end),
     {ok, Pid}.
@@ -82,7 +82,7 @@ start_link(Module, Args) ->
 init({Mod, Args}) ->
 
     % For debugging purposes.
-    output_log("A hera_measure process is being init!~n",[]),
+    output_log_spec("A hera_measure process is being init!~n",[]),
 
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
