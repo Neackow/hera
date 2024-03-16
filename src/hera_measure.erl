@@ -45,6 +45,20 @@ output_log(Message, Args=[]) ->
             ok
     end.
 
+% Decide whether or not to print the comments. Remember to change it in your environment.
+output_log_spec(Message, Args) ->
+    ShowLogs = application:get_env(hera, show_log_spec, false), 
+    if 
+        ShowLogs -> 
+            if Args == [] -> 
+                io:format("~nArgs = null~n");
+               true -> 
+                io:format(Message, Args)
+            end;
+        true -> 
+            ok
+    end.
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -82,6 +96,9 @@ init({Mod, Args}) ->
             output_log("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
 
             PidRef = subscribe(State#state.name), % Here, we have a subscription. The process is monitored.
+            
+            output_log_spec("My name is ~p and my Pid is ~p.~n",[State#state.name, PidRef]),
+
             NewState =
                 State#state{seq=Seq,mod=Mod,mod_state=ModState,monitor=PidRef},
             loop(NewState, true);
