@@ -73,7 +73,7 @@ get(Name, Node) ->
     Name :: atom(),
     Node :: node(),
     Seq :: pos_integer(),
-    Values :: [number(), ...].
+    Values :: [number(), ...]. 
 
 store(Name, Node, Seq, Values) ->
 
