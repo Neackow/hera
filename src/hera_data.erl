@@ -57,7 +57,7 @@ start_link() ->
     Measures :: [measure()].
 
 get(Name) ->
-    gen_server:call(?MODULE, {get, Name}).
+    gen_server:call(?MODULE, {get, Name}, 10000).
 
 
 -spec get(Name, Node) -> [Measure] when 
@@ -66,7 +66,7 @@ get(Name) ->
     Measure :: measure().
 
 get(Name, Node) -> 
-    gen_server:call(?MODULE, {get, Name, Node}).
+    gen_server:call(?MODULE, {get, Name, Node}, 10000).
 
 
 -spec store(Name, Node, Seq, Values) -> ok when

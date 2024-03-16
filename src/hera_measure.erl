@@ -93,7 +93,7 @@ init({Mod, Args}) ->
         true ->
             
             % For debugging purposes.
-            output_log("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
+            output_log_spec("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
 
             PidRef = subscribe(State#state.name), % Here, we have a subscription. The process is monitored.
             
@@ -105,7 +105,7 @@ init({Mod, Args}) ->
         false ->
 
             % For debugging purposes.
-            output_log("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
+            output_log_spec("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
             loop(NewState, false)
