@@ -4,7 +4,7 @@
 
 -export([start_link/0]).
 -export([get/1, get/2]).
--export([store/4]).
+-export([store/5]).
 -export([init/1, handle_call/3, handle_cast/2]).
 
 -type measure() :: {node(), pos_integer(), hera:timestamp(), [number(), ...]}.
@@ -73,18 +73,19 @@ get(Name, Node) ->
     gen_server:call(?MODULE, {get, Name, Node}, 60000).
 
 
--spec store(Name, Node, Seq, Values) -> ok when
+-spec store(Name, Node, Seq, Values, NowMicroS) -> ok when
     Name :: atom(),
     Node :: node(),
     Seq :: pos_integer(),
-    Values :: [number(), ...].
+    Values :: [number(), ...],
+    NowMicroS :: pos_integer().
 
-store(Name, Node, Seq, Values) ->
+store(Name, Node, Seq, Values, NowMicroS) ->
 
     % For debugging purposes.
     output_log("hera_data:store has been reached!~n",[]),
 
-    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).  % This is a typical cast call, which is handled by handle_cast.
+    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values, NowMicroS}).  % This is a typical cast call, which is handled by handle_cast.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Callbacks
@@ -114,7 +115,7 @@ handle_call({get, Name}, _From, MapData) ->
 handle_call({get, Name, Node}, _From, MapData) ->
 
     % For debugging purposes. Specific function call to only have these comments.
-    output_log_spec("hera_data:handle_call (Name, Node version) has been reached! Dealing with it. ~n",[]),
+    output_log_spec("hera_data:handle_call (Name=~p, Node=~p) has been reached! Dealing with it. ~n",[Name,Node]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
     %output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
@@ -139,10 +140,17 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 
-handle_cast({store, Name, Node, Seq1, L}, MapData) ->
+handle_cast({store, Name, Node, Seq1, L, NowMicroS}, MapData) ->
  
     output_log("hera_data:store is being handled by handle_cast!~n",[]),
     
+    case Name of 
+        e11 -> 
+            output_log_spec("hera_data (ID= ~p):store is being handled by handle_cast!~n",[NowMicroS]);
+        _ ->
+            ok
+    end,
+
     MapNode0 = maps:get(Name, MapData, #{}),
     IsLogger = application:get_env(hera, log_data, false), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
@@ -164,7 +172,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             % For debugging purposes.
             case Name of 
                 e11 -> 
-                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data!~n",[]);
+                    output_log_spec("BEFORE: hera_data:handle_cast (ID= ~p) is calling log_data!~n",[NowMicroS]);
                 _ ->
                     ok
             end,
@@ -173,7 +181,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
             case Name of 
                 e11 -> 
-                    output_log_spec("AFTER: hera_data:handle_cast finished log_data!~n",[]);
+                    output_log_spec("AFTER: hera_data:handle_cast (ID= ~p) finished log_data!~n",[NowMicroS]);
                 _ ->
                     ok
             end,
@@ -182,13 +190,6 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             maps:put(Node, NewData, MapNode1);
         _ ->
             MapNode1
-    end,
-
-    case Name of 
-        e11 -> 
-            output_log_spec("Handle_cast, just before reply, is maps:put taking long?~n",[]);
-        _ ->
-            ok
     end,
 
     {noreply, maps:put(Name, MapNode2, MapData)};

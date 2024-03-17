@@ -1,7 +1,7 @@
 -module(hera_com).
 
 -export([start_link/0]).
--export([send/3]).
+-export([send/4]).
 
 -define(MULTICAST_ADDR, {224,0,2,15}).
 -define(MULTICAST_PORT, 62476).
@@ -47,17 +47,18 @@ start_link() ->
     {ok, Pid}.
 
 
--spec send(Name, Seq, Values) -> ok when
+-spec send(Name, Seq, Values, NowMicroS) -> ok when
     Name :: atom(),
     Seq :: pos_integer(),
-    Values :: [number(), ...].
+    Values :: [number(), ...],
+    NowMicroS :: pos_integer().
 
-send(Name, Seq, Values) ->
+send(Name, Seq, Values, NowMicroS) ->
 
     % For debugging purposes.
     output_log("hera_com:send has been reached!~n",[]),
 
-    Message = {hera_data, Name, node(), Seq, Values},
+    Message = {hera_data, Name, node(), Seq, Values, NowMicroS},
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
     catch
         error:_ -> ok
@@ -120,6 +121,13 @@ loop(Socket) ->
 
                     % For debugging purposes.
                     output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
+
+                    case Name of 
+                        e11 -> 
+                            output_log_spec("Call to hera_data:store!~n",[]);
+                        _ ->
+                            ok
+                    end,
 
                     hera_data:store(Name, From, Seq, Values),
 
