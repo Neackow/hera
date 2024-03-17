@@ -4,7 +4,7 @@
 
 -export([start_link/0]).
 -export([get/1, get/2]).
--export([store/5]).
+-export([store/4]).
 -export([init/1, handle_call/3, handle_cast/2]).
 
 -type measure() :: {node(), pos_integer(), hera:timestamp(), [number(), ...]}.
@@ -73,19 +73,18 @@ get(Name, Node) ->
     gen_server:call(?MODULE, {get, Name, Node}, 60000).
 
 
--spec store(Name, Node, Seq, Values, NowMicroS) -> ok when
+-spec store(Name, Node, Seq, Values) -> ok when
     Name :: atom(),
     Node :: node(),
     Seq :: pos_integer(),
-    Values :: [number(), ...],
-    NowMicroS :: pos_integer().
+    Values :: [number(), ...].
 
-store(Name, Node, Seq, Values, NowMicroS) ->
+store(Name, Node, Seq, Values) ->
 
     % For debugging purposes.
     output_log("hera_data:store has been reached!~n",[]),
 
-    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values, NowMicroS}).  % This is a typical cast call, which is handled by handle_cast.
+    gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).  % This is a typical cast call, which is handled by handle_cast.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Callbacks
@@ -140,13 +139,13 @@ handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
 
-handle_cast({store, Name, Node, Seq1, L, NowMicroS}, MapData) ->
+handle_cast({store, Name, Node, Seq1, L}, MapData) ->
  
     output_log("hera_data:store is being handled by handle_cast!~n",[]),
     
     case Name of 
         e11 -> 
-            output_log_spec("hera_data (ID= ~p):store is being handled by handle_cast!~n",[NowMicroS]);
+            output_log_spec("hera_data:store is being handled by handle_cast!~n",[]);
         _ ->
             ok
     end,
@@ -172,7 +171,7 @@ handle_cast({store, Name, Node, Seq1, L, NowMicroS}, MapData) ->
             % For debugging purposes.
             case Name of 
                 e11 -> 
-                    output_log_spec("BEFORE: hera_data:handle_cast (ID= ~p) is calling log_data!~n",[NowMicroS]);
+                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data!~n",[]);
                 _ ->
                     ok
             end,
@@ -181,7 +180,7 @@ handle_cast({store, Name, Node, Seq1, L, NowMicroS}, MapData) ->
 
             case Name of 
                 e11 -> 
-                    output_log_spec("AFTER: hera_data:handle_cast (ID= ~p) finished log_data!~n",[NowMicroS]);
+                    output_log_spec("AFTER: hera_data:handle_cast finished log_data!~n",[]);
                 _ ->
                     ok
             end,

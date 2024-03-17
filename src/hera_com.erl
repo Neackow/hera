@@ -1,7 +1,7 @@
 -module(hera_com).
 
 -export([start_link/0]).
--export([send/4]).
+-export([send/3]).
 
 -define(MULTICAST_ADDR, {224,0,2,15}).
 -define(MULTICAST_PORT, 62476).
@@ -47,18 +47,17 @@ start_link() ->
     {ok, Pid}.
 
 
--spec send(Name, Seq, Values, NowMicroS) -> ok when
+-spec send(Name, Seq, Values) -> ok when
     Name :: atom(),
     Seq :: pos_integer(),
-    Values :: [number(), ...],
-    NowMicroS :: pos_integer().
+    Values :: [number(), ...].
 
-send(Name, Seq, Values, NowMicroS) ->
+send(Name, Seq, Values) ->
 
     % For debugging purposes.
     output_log("hera_com:send has been reached!~n",[]),
 
-    Message = {hera_data, Name, node(), Seq, Values, NowMicroS},
+    Message = {hera_data, Name, node(), Seq, Values},
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
     catch
         error:_ -> ok
