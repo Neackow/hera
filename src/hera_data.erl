@@ -140,25 +140,10 @@ handle_call(_Request, _From, State) ->
 
 
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
-    
-    case Name of 
-        e11 -> 
-            % For debugging purposes.
-            output_log_spec("hera_data:store is being handled by handle_cast!~n",[]),
-            output_log_spec("Size of MapData = ~p.~n", [maps:size(MapData)]);
-        _ ->
-            ok
-    end,
+ 
+    output_log("hera_data:store is being handled by handle_cast!~n",[]),
     
     MapNode0 = maps:get(Name, MapData, #{}),
-
-    case Name of 
-        e11 -> 
-            output_log_spec("After MapNode0: search in a map!~n",[]);
-        _ ->
-            ok
-    end,
-
     IsLogger = application:get_env(hera, log_data, false), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
     % io:format("IsLogger is ~p~n~n~n", [IsLogger]),
@@ -198,6 +183,14 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
         _ ->
             MapNode1
     end,
+
+    case Name of 
+        e11 -> 
+            output_log_spec("Handle_cast, just before reply, is maps:put taking long?~n",[]);
+        _ ->
+            ok
+    end,
+
     {noreply, maps:put(Name, MapNode2, MapData)};
 
 handle_cast(_Request, State) ->
