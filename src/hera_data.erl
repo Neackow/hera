@@ -147,7 +147,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
     output_log_spec("After MapNode0: search in a map!~n",[]),
 
-    IsLogger = application:get_env(hera, log_data, true), 
+    IsLogger = application:get_env(hera, log_data, false), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
     % io:format("IsLogger is ~p~n~n~n", [IsLogger]),
     MapNode1 = if
