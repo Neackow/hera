@@ -48,14 +48,13 @@ output_log(Message, Args=[]) ->
 % Decide whether or not to print the comments. Remember to change it in your environment.
 output_log_spec(Message, Args) ->
     {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:now_to_datetime(erlang:timestamp()),
-    DisplayedTime = list_to_binary(io_lib:format("~.4.0w-~.2.0w-~.2.0wT~.2.0w:~.2.0w:~.2.0w.0+00:00", [Year, Month, Day, Hour, Min, Sec])),
+    DisplayedTime = list_to_binary(io_lib:format("~.2.0w:~.2.0w:~.2.0w", [Hour, Min, Sec])),
 
     ShowLogs = application:get_env(hera, show_log_spec, false), 
     if
         ShowLogs -> 
             if Args == [] ->
-                io:format("[~p]: ", [DisplayedTime]),
-                io:format(Message);
+                io:format("~p: ~p.~n",[DisplayedTime, Message]);
                true -> 
                 io:format("[~p]: ", [DisplayedTime]),
                 io:format(Message, Args)
@@ -63,7 +62,6 @@ output_log_spec(Message, Args) ->
         true -> 
             ok
     end.
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,14 +200,14 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
 
             case M of
                 nav3 ->
-                    ok;
+                    hera_com:send(N, Seq, Vals);
                 e11 ->
-                    output_log_spec("Hera_measure:measure. Iter is = ~p!~n",[Iter])
+                    output_log_spec("Hera_measure:measure. Iter is = ~p!~n",[Iter]),
+                    output_log_spec("We are before hera_com:send in hera_measure!~n",[]),
+                    hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
+                    output_log_spec("We are after hera_com:send in hera_measure!~n",[])
             end,
 
-            output_log_spec("We are before hera_com:send in hera_measure!~n",[]),
-            hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
-            output_log_spec("We are after hera_com:send in hera_measure!~n",[]),
 
             NewIter = case Iter of
                 infinity -> Iter;

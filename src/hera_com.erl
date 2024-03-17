@@ -20,14 +20,13 @@ output_log(Message, Args=[]) ->
 
 output_log_spec(Message, Args) ->
     {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:now_to_datetime(erlang:timestamp()),
-    DisplayedTime = list_to_binary(io_lib:format("~.4.0w-~.2.0w-~.2.0wT~.2.0w:~.2.0w:~.2.0w.0+00:00", [Year, Month, Day, Hour, Min, Sec])),
+    DisplayedTime = list_to_binary(io_lib:format("~.2.0w:~.2.0w:~.2.0w", [Hour, Min, Sec])),
 
     ShowLogs = application:get_env(hera, show_log_spec, false), 
     if
         ShowLogs -> 
             if Args == [] ->
-                io:format("[~p]: ", [DisplayedTime]),
-                io:format(Message);
+                io:format("~p: ~p.~n",[DisplayedTime, Message]);
                true -> 
                 io:format("[~p]: ", [DisplayedTime]),
                 io:format(Message, Args)
@@ -60,14 +59,25 @@ send(Name, Seq, Values) ->
 
     Message = {hera_data, Name, node(), Seq, Values},
 
-    output_log_spec("Hera_com: before sending Message!~n",[]),
+    case Name of 
+        e11 -> 
+            output_log_spec("Hera_com: before sending Message!~n",[]);
+        _ ->
+            ok
+    end,
 
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
     catch
         error:_ -> ok
     end,
 
-    output_log_spec("Hera_com: after sending Message!~n",[]),
+    
+    case Name of 
+        e11 -> 
+            output_log_spec("Hera_com: after sending Message!~n",[]);
+        _ ->
+            ok
+    end,
 
     ok.
 
@@ -119,25 +129,25 @@ loop(Socket) ->
         {udp, _Sock, _IP, _InPortNo, Packet} ->     % Eventually, we receive the data. This in term calls the store function from hera_data.
             
             % For debugging purposes.
-            output_log_spec("I am hera_com:loop(Socket) and I received an udp message!~n",[]),
+            output_log("I am hera_com:loop(Socket) and I received an udp message!~n",[]),
             
             Message = binary_to_term(Packet),
             case Message of
                 {hera_data, Name, From, Seq, Values} ->
 
                     % For debugging purposes.
-                    output_log_spec("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
+                    output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
                     hera_data:store(Name, From, Seq, Values),
 
-                    output_log_spec("After hera_data:store!~n",[]);
+                    output_log("After hera_data:store!~n",[]);
                 _ ->
                     ok
             end;
         {send_packet, Packet} -> % A priori, from the initial call, we get here. This sends the data to all connected node, apparently. Thus, to self too.
             
             % For debugging purposes.
-            output_log_spec("I am hera_com:loop(Socket) and I received a send_packet message!~n",[]),
+            output_log("I am hera_com:loop(Socket) and I received a send_packet message!~n",[]),
             
             gen_udp:send(Socket, ?MULTICAST_ADDR, ?MULTICAST_PORT, Packet);
         _ ->

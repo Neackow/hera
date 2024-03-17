@@ -32,14 +32,13 @@ output_log(Message, Args) ->
 % Decide whether or not to print the comments. Remember to change it in your environment.
 output_log_spec(Message, Args) ->
     {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:now_to_datetime(erlang:timestamp()),
-    DisplayedTime = list_to_binary(io_lib:format("~.4.0w-~.2.0w-~.2.0wT~.2.0w:~.2.0w:~.2.0w.0+00:00", [Year, Month, Day, Hour, Min, Sec])),
+    DisplayedTime = list_to_binary(io_lib:format("~.2.0w:~.2.0w:~.2.0w", [Hour, Min, Sec])),
 
     ShowLogs = application:get_env(hera, show_log_spec, false), 
     if
         ShowLogs -> 
             if Args == [] ->
-                io:format("[~p]: ", [DisplayedTime]),
-                io:format(Message);
+                io:format("~p: ~p.~n",[DisplayedTime, Message]);
                true -> 
                 io:format("[~p]: ", [DisplayedTime]),
                 io:format(Message, Args)
@@ -145,7 +144,12 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
     
     MapNode0 = maps:get(Name, MapData, #{}),
 
-    output_log_spec("After MapNode0: search in a map!~n",[]),
+    case Name of 
+        e11 -> 
+            output_log_spec("After MapNode0: search in a map!~n",[]);
+        _ ->
+            ok
+    end,
 
     IsLogger = application:get_env(hera, log_data, false), 
     % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
@@ -165,11 +169,21 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             T = hera:timestamp(),
 
             % For debugging purposes.
-            output_log_spec("BEFORE: hera_data:handle_cast is calling log_data!~n",[]),
+            case Name of 
+                e11 -> 
+                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data!~n",[]);
+                _ ->
+                    ok
+            end,
 
             log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
 
-            output_log_spec("AFTER: hera_data:handle_cast finished log_data!~n",[]),
+            case Name of 
+                e11 -> 
+                    output_log_spec("AFTER: hera_data:handle_cast finished log_data!~n",[]);
+                _ ->
+                    ok
+            end,
 
             NewData = Data#data{seq=Seq1,values=L,timestamp=T},
             maps:put(Node, NewData, MapNode1);
