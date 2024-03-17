@@ -58,27 +58,10 @@ send(Name, Seq, Values) ->
     output_log("hera_com:send has been reached!~n",[]),
 
     Message = {hera_data, Name, node(), Seq, Values},
-
-    case Name of 
-        e11 -> 
-            output_log_spec("Hera_com: before sending Message!~n",[]);
-        _ ->
-            ok
-    end,
-
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
     catch
         error:_ -> ok
     end,
-
-    
-    case Name of 
-        e11 -> 
-            output_log_spec("Hera_com: after sending Message!~n",[]);
-        _ ->
-            ok
-    end,
-
     ok.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

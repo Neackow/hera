@@ -114,7 +114,7 @@ handle_call({get, Name}, _From, MapData) ->
 handle_call({get, Name, Node}, _From, MapData) ->
 
     % For debugging purposes. Specific function call to only have these comments.
-    output_log_spec("hera_data:handle_call (Name,Node version) has been reached! Dealing with it. ~n",[]),
+    output_log_spec("hera_data:handle_call (Name, Node version) has been reached! Dealing with it. ~n",[]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
     %output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
@@ -133,6 +133,8 @@ handle_call({get, Name, Node}, _From, MapData) ->
 
     {reply, Res, MapData};
 
+
+
 handle_call(_Request, _From, State) ->
     {reply, ok, State}.
 
@@ -140,8 +142,8 @@ handle_call(_Request, _From, State) ->
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
     % For debugging purposes.
-    output_log("hera_data:store is being handled by handle_cast!~n",[]),
-    
+    output_log_spec("hera_data:store is being handled by handle_cast!~n",[]),
+    output_log_spec("Size of MapData = ~p.~n", [maps:size(MapData)]),
     MapNode0 = maps:get(Name, MapData, #{}),
 
     case Name of 
