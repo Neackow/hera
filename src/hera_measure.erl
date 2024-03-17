@@ -86,9 +86,18 @@ init({Mod, Args}) ->
 
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
+
+    output_log_spec("I am L0 : ~p!~n",[L0]),
+
     L1 = lists:map(fun({Key, Val}) -> maps:get(Key, Spec, Val) end, L0),
+
+    output_log_spec("I am L1 : ~p!~n",[L1]),
+
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
+
+    output_log_spec("What is state.sync? : ~p!~n",[State#state.sync]),
+
     case State#state.sync of
         true ->
             
@@ -108,7 +117,11 @@ init({Mod, Args}) ->
             output_log_spec("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
-            loop(NewState, false)
+            loop(NewState, false);
+
+        _Else -> 
+            output_log_spec("So no values for State#state.sync?~n",[])
+
     end.
 
 
