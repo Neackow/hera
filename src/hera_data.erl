@@ -113,18 +113,18 @@ handle_call({get, Name, Node}, _From, MapData) ->
     output_log_spec("hera_data:handle_call (Name,Node version) has been reached! Dealing with it. ~n",[]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
-    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
+    %output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
 
     Res = if
         is_map_key(Node, MapMeasure) ->
             #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure),
-            output_log_spec("Is #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure) from is_map_key(Node, MapMeasuer) taking 5secs? ~n",[]),
+            %output_log_spec("Is #data{seq=S,values=V,timestamp=T} = maps:get(Node, MapMeasure) from is_map_key(Node, MapMeasure) taking 5secs? ~n",[]),
 
             [{Node,S,T,V}];
         true ->
             []
     end,
-    output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
+    %output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
     output_log_spec("~n~n I am MapData: ~p~n~n",[MapData]),
 
     {reply, Res, MapData};

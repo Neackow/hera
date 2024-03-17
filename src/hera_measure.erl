@@ -47,12 +47,17 @@ output_log(Message, Args=[]) ->
 
 % Decide whether or not to print the comments. Remember to change it in your environment.
 output_log_spec(Message, Args) ->
+    {{Year, Month, Day}, {Hour, Min, Sec}} = calendar:now_to_datetime(erlang:timestamp()),
+    DisplayedTime = list_to_binary(io_lib:format("~.4.0w-~.2.0w-~.2.0wT~.2.0w:~.2.0w:~.2.0w.0+00:00", [Year, Month, Day, Hour, Min, Sec])),
+
     ShowLogs = application:get_env(hera, show_log_spec, false), 
-    if 
+    if
         ShowLogs -> 
-            if Args == [] -> 
+            if Args == [] ->
+                io:format("[~p]: ", [DisplayedTime]),
                 io:format(Message);
                true -> 
+                io:format("[~p]: ", [DisplayedTime]),
                 io:format(Message, Args)
             end;
         true -> 
@@ -87,16 +92,16 @@ init({Mod, Args}) ->
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
 
-    output_log_spec("I am L0 : ~p!~n",[L0]),
+    %output_log_spec("I am L0 : ~p!~n",[L0]),
 
     L1 = lists:map(fun({Key, Val}) -> maps:get(Key, Spec, Val) end, L0),
 
-    output_log_spec("I am L1 : ~p!~n",[L1]),
+    %output_log_spec("I am L1 : ~p!~n",[L1]),
 
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
 
-    output_log_spec("What is state.sync? : ~p!~n",[State#state.sync]),
+    %output_log_spec("What is state.sync? : ~p!~n",[State#state.sync]),
 
     case State#state.sync of
         true ->
@@ -149,6 +154,9 @@ loop(State=#state{monitor={From,Ref}}, true) ->
 
 
 continue(#state{iter=0}) ->
+
+    output_log_spec("HELP ME I'M DYING! hera_measure:continue.~n",[]),
+
     {stop, normal};
 
 continue(State) ->
@@ -194,6 +202,7 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
 
             % For debugging purposes.
             output_log("Sending to hera_com from hera_measure!~n",[]),
+            output_log_spec("Hera_measure:measure. Iter is = ~p!~n",[Iter]),
 
             hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
             NewIter = case Iter of
