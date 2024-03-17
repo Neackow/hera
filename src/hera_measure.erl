@@ -202,7 +202,13 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
 
             % For debugging purposes.
             output_log("Sending to hera_com from hera_measure!~n",[]),
-            output_log_spec("Hera_measure:measure. Iter is = ~p!~n",[Iter]),
+
+            case M of
+                nav3 ->
+                    ok;
+                e11 ->
+                    output_log_spec("Hera_measure:measure. Iter is = ~p!~n",[Iter])
+            end,
 
             hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
             NewIter = case Iter of
