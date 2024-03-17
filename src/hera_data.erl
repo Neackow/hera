@@ -140,10 +140,16 @@ handle_call(_Request, _From, State) ->
 
 
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
-
-    % For debugging purposes.
-    output_log_spec("hera_data:store is being handled by handle_cast!~n",[]),
-    output_log_spec("Size of MapData = ~p.~n", [maps:size(MapData)]),
+    
+    case Name of 
+        e11 -> 
+            % For debugging purposes.
+            output_log_spec("hera_data:store is being handled by handle_cast!~n",[]),
+            output_log_spec("Size of MapData = ~p.~n", [maps:size(MapData)]);
+        _ ->
+            ok
+    end,
+    
     MapNode0 = maps:get(Name, MapData, #{}),
 
     case Name of 
