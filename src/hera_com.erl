@@ -119,7 +119,7 @@ loop(Socket) ->
                 {hera_data, Name, From, Seq, Values} ->
 
                     % For debugging purposes.
-                    output_log_spec("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
+                    output_log"I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
                     case Name of 
                         e11 -> 
@@ -130,7 +130,14 @@ loop(Socket) ->
 
                     hera_data:store(Name, From, Seq, Values),
 
-                    output_log_spec("After hera_data:store for values ~p.~n",[Values]);
+                    case Name of 
+                        e11 -> 
+                            output_log_spec("After hera_data:store for values ~p.~n",[Values]);
+                        _ ->
+                            ok
+                    end,
+
+                    output_log("After hera_data:store for values ~p.~n",[]);
                 _ ->
                     ok
             end;
