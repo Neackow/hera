@@ -123,7 +123,7 @@ loop(Socket) ->
 
                     case Name of 
                         e11 -> 
-                            output_log_spec("Call to hera_data:store!~n",[]);
+                            output_log_spec("Call to hera_data:store for values ~p.~n",[Values]);
                         _ ->
                             ok
                     end,
