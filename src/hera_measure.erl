@@ -121,10 +121,6 @@ init({Mod, Args}) ->
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
             loop(NewState, false);
-
-        _Else -> 
-            output_log_spec("So no values for State#state.sync?~n",[])
-
     end.
 
 
@@ -155,6 +151,7 @@ continue(#state{iter=0}) ->
     {stop, normal};
 
 continue(State) ->
+    output_log_spec("**** Going to sleep for ~p ~n",[State#state.timeout]),
     timer:sleep(State#state.timeout),
     loop(State, State#state.sync).
 
