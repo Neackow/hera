@@ -99,7 +99,7 @@ init({Mod, Args}) ->
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
 
-    %output_log_spec("What is state.sync? : ~p!~n",[State#state.sync]),
+    output_log_spec("The inital state will be {seq= ~p, mod= ~p, mod_state= ~p}!~n",[Seq, Mod, ModState]),
 
     case State#state.sync of
         true ->
@@ -151,7 +151,7 @@ continue(#state{iter=0}) ->
     {stop, normal};
 
 continue(State) ->
-    output_log_spec("**** Going to sleep for ~p ~n",[State#state.timeout]),
+    output_log_spec("**** ~p Going to sleep for ~p ~n",[State#state.mod, State#state.timeout]),
     timer:sleep(State#state.timeout),
     loop(State, State#state.sync).
 
@@ -200,9 +200,9 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
                 nav3 ->
                     hera_com:send(N, Seq, Vals);
                 e11 ->
-                    output_log_spec("Hera_measure:measure. Iter is = ~p, calling hera_com:send~n",[Iter]),
+                    output_log_spec("Hera_measure:measure (e11). Iter is = ~p, calling hera_com:send~n",[Iter]),
                     hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
-                    output_log_spec("Hera_measure:measure after hera_com:send !~n",[])
+                    output_log_spec("Hera_measure:measure (e11) after hera_com:send !~n",[])
             end,
 
             NewIter = case Iter of
