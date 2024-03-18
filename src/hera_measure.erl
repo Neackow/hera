@@ -36,7 +36,7 @@
 
 
 % Decide whether or not to print the comments. Remember to change it in your environment.
-output_log(Message, Args=[]) ->
+output_log(Message, Args) ->
     ShowLogs = application:get_env(hera, show_log, false), 
     if 
         ShowLogs -> 
