@@ -39,9 +39,9 @@ output_log_spec(Message, Args) ->
         ShowLogs -> 
             if Args == [] ->
                 io:format("~p: ~p.~n",[DisplayedTime, Message]);
-               true -> 
-                io:format("[~p]: ", [DisplayedTime]),
-                io:format(Message, Args)
+               true ->
+                FullMessage = concat("[~p]: ", Message),
+                io:format(FullMessage, [DisplayedTime|Args])
             end;
         true -> 
             ok
@@ -171,7 +171,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             % For debugging purposes.
             case Name of 
                 e11 -> 
-                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data!~n",[]);
+                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data for ~p.~n",[L]);
                 _ ->
                     ok
             end,
@@ -180,7 +180,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
             case Name of 
                 e11 -> 
-                    output_log_spec("AFTER: hera_data:handle_cast finished log_data!~n",[]);
+                    output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]);
                 _ ->
                     ok
             end,
