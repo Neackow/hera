@@ -119,7 +119,7 @@ loop(Socket) ->
                 {hera_data, Name, From, Seq, Values} ->
 
                     % For debugging purposes.
-                    output_log"I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
+                    output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
                     case Name of 
                         e11 -> 
