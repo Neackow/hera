@@ -26,10 +26,10 @@ output_log_spec(Message, Args) ->
     if
         ShowLogs -> 
             if Args == [] ->
-                io:format("~p: ~p.~n",[DisplayedTime, Message]);
+                io:format("[~p]: ~p.~n",[DisplayedTime, Message]);
                true -> 
-                io:format("[~p]: ", [DisplayedTime]),
-                io:format(Message, Args)
+                FullMessage = "[~p]: " ++ Message,
+                io:format(FullMessage, [DisplayedTime|Args])
             end;
         true -> 
             ok
@@ -130,7 +130,7 @@ loop(Socket) ->
 
                     hera_data:store(Name, From, Seq, Values),
 
-                    output_log("After hera_data:store!~n",[]);
+                    output_log("After hera_data:store for values ~p.~n",[Values]);
                 _ ->
                     ok
             end;
