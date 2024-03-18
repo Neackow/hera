@@ -90,16 +90,16 @@ init({Mod, Args}) ->
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
 
-    %output_log_spec("I am L0 : ~p!~n",[L0]),
+    output_log_spec("I am L0 : ~p!~n",[L0]),
 
     L1 = lists:map(fun({Key, Val}) -> maps:get(Key, Spec, Val) end, L0),
 
-    %output_log_spec("I am L1 : ~p!~n",[L1]),
+    output_log_spec("I am L1 : ~p!~n",[L1]),
 
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
 
-    output_log_spec("The inital state will be {seq= ~p, mod= ~p, mod_state= ~p}!~n",[Seq, Mod, ModState]),
+    output_log_spec("The inital state will be {seq= ~p, mod= ~p, mod_state= ~p, iter= ~p, timeout= ~p}!~n",[Seq, Mod, ModState, State#state.iter, State#state.timeout]),
 
     case State#state.sync of
         true ->
@@ -151,7 +151,6 @@ continue(#state{iter=0}) ->
     {stop, normal};
 
 continue(State) ->
-    output_log_spec("**** ~p Going to sleep for ~p ~n",[State#state.mod, State#state.timeout]),
     timer:sleep(State#state.timeout),
     loop(State, State#state.sync).
 
