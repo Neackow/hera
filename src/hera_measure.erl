@@ -120,7 +120,7 @@ init({Mod, Args}) ->
             output_log_spec("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
-            loop(NewState, false);
+            loop(NewState, false)
     end.
 
 
@@ -204,7 +204,6 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
                     hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
                     output_log_spec("Hera_measure:measure after hera_com:send !~n",[])
             end,
-
 
             NewIter = case Iter of
                 infinity -> Iter;
