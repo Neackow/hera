@@ -181,7 +181,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             case Name of 
                 e11 -> 
                     output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
-                    MemoryInfo = grisp:memory(),
+                    MemoryInfo = erlang:memory(),
 
                     output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
                 _ ->
