@@ -128,16 +128,7 @@ loop(Socket) ->
                             ok
                     end,
 
-                    hera_data:store(Name, From, Seq, Values),
-
-                    case Name of 
-                        e11 -> 
-                            output_log_spec("After hera_data:store for values ~p.~n",[Values]);
-                        _ ->
-                            ok
-                    end,
-
-                    output_log("After hera_data:store for values ~p.~n",[]);
+                    hera_data:store(Name, From, Seq, Values);
                 _ ->
                     ok
             end;

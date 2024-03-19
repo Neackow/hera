@@ -129,7 +129,7 @@ handle_call({get, Name, Node}, _From, MapData) ->
             []
     end,
     %output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
-    output_log_spec("~n~n I am MapData: ~p~n~n",[MapData]),
+    output_log_spec("~n~n I am MapData: ~n~n",[]),
 
     {reply, Res, MapData};
 
@@ -180,7 +180,10 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
             case Name of 
                 e11 -> 
-                    output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]);
+                    output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
+                    MemoryInfo = grisp:memory(),
+
+                    output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
                 _ ->
                     ok
             end,

@@ -54,10 +54,10 @@ output_log_spec(Message, Args) ->
     if
         ShowLogs -> 
             if Args == [] ->
-                io:format("[~p]: ~p.~n",[DisplayedTime, Message]);
+                io:format("[~p] (~p): ~p.~n",[DisplayedTime, ?MODULE, Message]);
                true -> 
-                FullMessage = "[~p]: " ++ Message,
-                io:format(FullMessage, [DisplayedTime|Args])
+                FullMessage = "[~p] (~p): " ++ Message,
+                io:format(FullMessage, [DisplayedTime|[?MODULE|Args]])
             end;
         true -> 
             ok
