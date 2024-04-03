@@ -13,18 +13,18 @@ kf({X0, P0}, F, H, Q, R, Z) ->
 
 
 kf_predict({X0, P0}, F, Q) ->
-    Xp = mat:'*'(F, X0), 
-    Pp = mat:eval([F, '*', P0, '*´', F, '+', Q]),
+    Xp = mat:'*'(F, X0),                            % From TFE Sébastien Kalbusch: eq. 2.1
+    Pp = mat:eval([F, '*', P0, '*´', F, '+', Q]),   % Eq. 2.2
     {Xp, Pp}.
 
 
 kf_update({Xp, Pp}, H, R, Z) ->
-    S = mat:eval([H, '*', Pp, '*´', H, '+', R]), 
+    S = mat:eval([H, '*', Pp, '*´', H, '+', R]),    % Part of eq. 2.3
     Sinv = mat:inv(S), 
-    K = mat:eval([Pp, '*´', H, '*', Sinv]),
-    Y = mat:'-'(Z, mat:'*'(H, Xp)),
-    X1 = mat:eval([K, '*', Y, '+', Xp]),  
-    P1 = mat:'-'(Pp, mat:eval([K, '*', H, '*', Pp])), 
+    K = mat:eval([Pp, '*´', H, '*', Sinv]),         % Eq. 2.3
+    Y = mat:'-'(Z, mat:'*'(H, Xp)),                 % Part of eq. 2.4
+    X1 = mat:eval([K, '*', Y, '+', Xp]),            % Eq. 2.4
+    P1 = mat:'-'(Pp, mat:eval([K, '*', H, '*', Pp])), % Eq. 2.5
     {X1, P1}.
 
 
