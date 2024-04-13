@@ -71,7 +71,7 @@ send(Name, Seq, Values) ->
 init() ->
     Socket = open_socket(1),
     io:format("Connection established!~n"),
-    loop(Socket).
+    loop(Socket). 
 
 
 open_socket(Delay) ->
