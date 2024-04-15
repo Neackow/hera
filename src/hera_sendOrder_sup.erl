@@ -10,7 +10,7 @@ start_link() ->
 
 init(_Args) ->
     SupFlags = #{strategy => one_for_one, intensity => 1, period => 5},
-    ChildSpecs = [#{id => test_hera_sendOrder,
+    ChildSpecs = [#{id => hera_sendOrder,
                     start => {hera_sendOrder, start_link, []},
                     restart => transient,
                     shutdown => 5000,

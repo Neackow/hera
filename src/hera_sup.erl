@@ -35,5 +35,9 @@ init([]) ->
         start => {hera_measure_sup, start_link, []},
         type => supervisor
     },
+    %HeraSendOrder = #{          % Hera add-up: control objects with the GRiSP.
+    %    id => hera_sendOrder,
+    %    start => {hera_sendOrder, start_link, []}
+    %},
     ChildSpecs = [HeraData, HeraCom, HeraMeasureSup],
     {ok, {SupFlags, ChildSpecs}}.

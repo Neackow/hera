@@ -32,6 +32,11 @@ start_link() ->
 
 %% Synchronous call: sets the new state according to the detected movement. This function is called by rpc:call on the other GRiSP. 
 set_state_crate(MovementDetected) -> 
+    if(MovementDetected == testRPC) ->
+        grisp_led:color(1,white);
+        true ->
+            ok
+    end,
     gen_server:call(?MODULE, {ctrlCrate, MovementDetected}).
 
 % =======================================================================
@@ -119,7 +124,7 @@ order_crate(State) ->
     end,
 
     % Send command to the micro-controller.
-    %send_i2c(Order),
+    send_i2c(Order),
     io:format("Order is ~p~n", [Order]),
     io:format("Current state is ~p~n", [NewState]),
     NewState.
@@ -153,14 +158,14 @@ init([]) ->
     % Display message to the console: allows to see if the function is correctly being setup from the shell.
     io:format("Object controller is being setup!~n"),
     % Change LED colors: allow to visually tell if the process has been launched, or not.
-    %grisp_led:color(1,aqua),
-    %grisp_led:color(2,yellow),
+    grisp_led:color(1,aqua),
+    grisp_led:color(2,yellow),
     % Set default state and return {ok, state}.
     {ok, #movState{currentSpeed = 100, movName = noMove, movMode = normal}}.
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
-    %Available = read_i2c(),
-    Available = 1,
+    Available = read_i2c(),
+    %Available = 1,
     if Available == 1 ->
         if MovementDetected == changeSpeed -> 
             NewState = State#movState{movName = noMove, movMode = changeSpeed}; 
