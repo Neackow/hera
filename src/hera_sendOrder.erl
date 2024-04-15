@@ -136,7 +136,7 @@ read_i2c() ->
     I2C1 = grisp_i2c:open(i2c1),
     Message = grisp_i2c:transfer(I2C1, [{read, 16#40, 1, 1}]), % Reads 1 byte from slave at address 0x40, in register 1.
     io:format("Message received is ~p~n", [Message]),
-    Available = erlang:binary_to_integer(Message, 8). % Convert the binary coded on 8 bits to an integer.
+    Available = lists:nth(1, binary_to_list(lists:nth(1, Message))). % Convert the binary coded on 8 bits and received as [<<val>>] to an integer.
     
 
 % =======================================================================
