@@ -200,7 +200,7 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
                     hera_com:send(N, Seq, Vals);
                 e11 ->
                     %output_log_spec("Hera_measure:measure (e11). Iter is = ~p, calling hera_com:send for values ~p.~n",[Iter, Vals]),
-                    hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
+                    hera_com:send(N, Seq, Vals) % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
                     %output_log_spec("Hera_measure:measure (e11) after hera_com:send !~n",[])
             end,
 

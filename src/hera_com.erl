@@ -121,12 +121,12 @@ loop(Socket) ->
                     % For debugging purposes.
                     %output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
-                    case Name of 
-                        e11 -> 
-                            %output_log_spec("Call to hera_data:store for values ~p.~n",[Values]);
-                        _ ->
-                            ok
-                    end,
+                    %case Name of 
+                    %    e11 -> 
+                    %        output_log_spec("Call to hera_data:store for values ~p.~n",[Values]);
+                    %    _ ->
+                    %        ok
+                    %end,
 
                     hera_data:store(Name, From, Seq, Values);
                 _ ->
