@@ -167,12 +167,12 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             T = hera:timestamp(),
 
             % For debugging purposes.
-            case Name of 
-                e11 -> 
-                    %output_log_spec("BEFORE: hera_data:handle_cast is calling log_data for ~p.~n",[L]);
-                _ ->
-                    ok
-            end,
+            %case Name of 
+            %    e11 -> 
+            %        output_log_spec("BEFORE: hera_data:handle_cast is calling log_data for ~p.~n",[L]);
+            %    _ ->
+            %        ok
+            %end,
 
             log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
 
