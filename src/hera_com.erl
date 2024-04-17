@@ -55,7 +55,7 @@ start_link() ->
 send(Name, Seq, Values) ->
 
     % For debugging purposes.
-    output_log("hera_com:send has been reached!~n",[]),
+    %output_log("hera_com:send has been reached!~n",[]),
 
     Message = {hera_data, Name, node(), Seq, Values},
     try ?MODULE ! {send_packet, term_to_binary(Message)} % it will try to send to itself. This goes to the loop(Socket) function.
@@ -106,24 +106,24 @@ open_socket() ->
 loop(Socket) ->
 
     % For debugging purposes.
-    output_log("hera_com:loop has been reached!~n",[]),
+    %output_log("hera_com:loop has been reached!~n",[]),
 
     receive
         {udp, _Sock, _IP, _InPortNo, Packet} ->     % Eventually, we receive the data. This in term calls the store function from hera_data.
             
             % For debugging purposes.
-            output_log("I am hera_com:loop(Socket) and I received an udp message!~n",[]),
+            %output_log("I am hera_com:loop(Socket) and I received an udp message!~n",[]),
             
             Message = binary_to_term(Packet),
             case Message of
                 {hera_data, Name, From, Seq, Values} ->
 
                     % For debugging purposes.
-                    output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
+                    %output_log("I am hera_com:loop(Socket) and I am trying to store data!~n",[]),
 
                     case Name of 
                         e11 -> 
-                            output_log_spec("Call to hera_data:store for values ~p.~n",[Values]);
+                            %output_log_spec("Call to hera_data:store for values ~p.~n",[Values]);
                         _ ->
                             ok
                     end,
@@ -135,7 +135,7 @@ loop(Socket) ->
         {send_packet, Packet} -> % A priori, from the initial call, we get here. This sends the data to all connected node, apparently. Thus, to self too.
             
             % For debugging purposes.
-            output_log("I am hera_com:loop(Socket) and I received a send_packet message!~n",[]),
+            %output_log("I am hera_com:loop(Socket) and I received a send_packet message!~n",[]),
             
             gen_udp:send(Socket, ?MULTICAST_ADDR, ?MULTICAST_PORT, Packet);
         _ ->

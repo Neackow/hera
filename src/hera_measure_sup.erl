@@ -32,7 +32,7 @@ start_link() ->
 start_child(Module, Args) ->
 
     % For debugging purposes.
-    output_log("hera_measure_sup:start_child has been reached!~n",[]),
+    %output_log("hera_measure_sup:start_child has been reached!~n",[]),
 
     supervisor:start_child(?MODULE, [Module, Args]).
 

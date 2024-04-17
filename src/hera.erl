@@ -37,7 +37,7 @@ output_log(Message, Args=[]) ->
 start_measure(Module, Args) ->
 
     % For debugging purposes.
-    output_log("hera:start_measure has been reached!~n",[]),
+    %output_log("hera:start_measure has been reached!~n",[]),
 
     hera_measure_sup:start_child(Module, Args). % In hera_measure_sup, this leads to supervisor:start_child(?MODULE, [nav3, Cn]). 
 

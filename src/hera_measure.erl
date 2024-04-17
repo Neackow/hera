@@ -71,7 +71,7 @@ output_log_spec(Message, Args) ->
 start_link(Module, Args) ->
 
     % For debugging purposes.
-    output_log_spec("Hey, I'm hera_measure, this is my start_link function!~n",[]),
+    %output_log_spec("Hey, I'm hera_measure, this is my start_link function!~n",[]),
 
     Pid = spawn_link(fun() -> init({Module, Args}) end),
     {ok, Pid}.
@@ -85,31 +85,31 @@ start_link(Module, Args) ->
 init({Mod, Args}) ->
 
     % For debugging purposes.
-    output_log_spec("A hera_measure process is being init!~n",[]),
+    %output_log_spec("A hera_measure process is being init!~n",[]),
 
     {ok, ModState, Spec} = Mod:init(Args), % Here, e11:init(R0) will be called.
     L0 = ?record_to_tuplelist(state, #state{}),
 
-    output_log_spec("I am L0 : ~p!~n",[L0]),
+    %output_log_spec("I am L0 : ~p!~n",[L0]),
 
     L1 = lists:map(fun({Key, Val}) -> maps:get(Key, Spec, Val) end, L0),
 
-    output_log_spec("I am L1 : ~p!~n",[L1]),
+    %output_log_spec("I am L1 : ~p!~n",[L1]),
 
     State = list_to_tuple([state|L1]),
     Seq = init_seq(State#state.name),
 
-    output_log_spec("The inital state will be {seq= ~p, mod= ~p, mod_state= ~p, iter= ~p, timeout= ~p}!~n",[Seq, Mod, ModState, State#state.iter, State#state.timeout]),
+    %output_log_spec("The inital state will be {seq= ~p, mod= ~p, mod_state= ~p, iter= ~p, timeout= ~p}!~n",[Seq, Mod, ModState, State#state.iter, State#state.timeout]),
 
     case State#state.sync of
         true ->
             
             % For debugging purposes.
-            output_log_spec("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
+            %output_log_spec("In hera_measure:init, I will subscribe a process (true condition on State#state.sync)!~n",[]),
 
             PidRef = subscribe(State#state.name), % Here, we have a subscription. The process is monitored.
             
-            output_log_spec("My name is ~p and my Pid is ~p.~n",[State#state.name, PidRef]),
+            %output_log_spec("My name is ~p and my Pid is ~p.~n",[State#state.name, PidRef]),
 
             NewState =
                 State#state{seq=Seq,mod=Mod,mod_state=ModState,monitor=PidRef},
@@ -117,7 +117,7 @@ init({Mod, Args}) ->
         false ->
 
             % For debugging purposes.
-            output_log_spec("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
+            %output_log_spec("In hera_measure:init, in the false condition on State#state.sync)!~n",[]),
 
             NewState = State#state{seq=Seq,mod=Mod,mod_state=ModState},
             loop(NewState, false)
@@ -127,14 +127,14 @@ init({Mod, Args}) ->
 loop(State, false) ->
 
     % For debugging purposes.
-    output_log("hera_measure:loop with false condition has been reached!~n",[]),
+    %output_log("hera_measure:loop with false condition has been reached!~n",[]),
 
     continue(measure(State));
 
 loop(State=#state{monitor={From,Ref}}, true) ->
 
     % For debugging purposes.
-    output_log("hera_measure:loop with true condition has been reached!~n",[]),
+    %output_log("hera_measure:loop with true condition has been reached!~n",[]),
 
     receive
         {authorized, From} ->
@@ -160,7 +160,7 @@ subscribe(Name) ->
     Ref = monitor(process, Pid),
 
     % For debugging purposes.
-    output_log("Process subscribed (hera_measure)!~n",[]),
+    %output_log("Process subscribed (hera_measure)!~n",[]),
 
     {Pid, Ref}.
 
@@ -180,28 +180,28 @@ init_seq(Name) ->
 measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
 
     % For debugging purposes.
-    output_log("hera_measure:measure has been reached!~n",[]),
+    %output_log("hera_measure:measure has been reached!~n",[]),
 
     case M:measure(MS) of
 
         {undefined, NewMS} ->
 
             % For debugging purposes.
-            output_log("hera_measure:measure received an undefined response from M:measure(MS)!~n",[]),
+            %output_log("hera_measure:measure received an undefined response from M:measure(MS)!~n",[]),
 
             State#state{mod_state=NewMS};
         {ok, Vals=[_|_], NewMS} ->
 
             % For debugging purposes.
-            output_log("Sending to hera_com from hera_measure!~n",[]),
+            %output_log("Sending to hera_com from hera_measure!~n",[]),
 
             case M of
                 nav3 ->
                     hera_com:send(N, Seq, Vals);
                 e11 ->
-                    output_log_spec("Hera_measure:measure (e11). Iter is = ~p, calling hera_com:send for values ~p.~n",[Iter, Vals]),
+                    %output_log_spec("Hera_measure:measure (e11). Iter is = ~p, calling hera_com:send for values ~p.~n",[Iter, Vals]),
                     hera_com:send(N, Seq, Vals), % This will call hera_com:send(N, Seq, Vals), from the loop function, when the message is authorized.
-                    output_log_spec("Hera_measure:measure (e11) after hera_com:send !~n",[])
+                    %output_log_spec("Hera_measure:measure (e11) after hera_com:send !~n",[])
             end,
 
             NewIter = case Iter of

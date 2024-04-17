@@ -82,7 +82,7 @@ get(Name, Node) ->
 store(Name, Node, Seq, Values) ->
 
     % For debugging purposes.
-    output_log("hera_data:store has been reached!~n",[]),
+    %output_log("hera_data:store has been reached!~n",[]),
 
     gen_server:cast(?MODULE, {store, Name, Node, Seq, Values}).  % This is a typical cast call, which is handled by handle_cast.
 
@@ -97,16 +97,16 @@ init([]) ->
 handle_call({get, Name}, _From, MapData) ->
 
     % For debugging purposes.
-    output_log_spec("hera_data:handle_call (Name alone version) has been reached! Dealing with it. ~n",[]),
+    %output_log_spec("hera_data:handle_call (Name alone version) has been reached! Dealing with it. ~n",[]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
-    output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
+    %output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
 
     L = maps:to_list(MapMeasure),
-    output_log_spec("Is L = maps:to_list(MapMeasure) taking 5secs? ~n",[]),
+    %output_log_spec("Is L = maps:to_list(MapMeasure) taking 5secs? ~n",[]),
 
     Res = [{Node,S,T,V} || {Node, #data{seq=S,values=V,timestamp=T}} <- L],
-    output_log_spec("Is the reply taking 5secs?~n",[]),
+    %output_log_spec("Is the reply taking 5secs?~n",[]),
 
     {reply, Res, MapData};
 
@@ -114,7 +114,7 @@ handle_call({get, Name}, _From, MapData) ->
 handle_call({get, Name, Node}, _From, MapData) ->
 
     % For debugging purposes. Specific function call to only have these comments.
-    output_log_spec("hera_data:handle_call (From=~p) has been reached! Dealing with it. ~n",[_From]),
+    %output_log_spec("hera_data:handle_call (From=~p) has been reached! Dealing with it. ~n",[_From]),
 
     MapMeasure = maps:get(Name, MapData, #{}),
     %output_log_spec("Is MapMeasure = maps:get(Name, MapData, #{}) taking 5secs? ~n",[]),
@@ -129,7 +129,7 @@ handle_call({get, Name, Node}, _From, MapData) ->
             []
     end,
     %output_log_spec("Is the reply taking 5secs for ~p~n",[Res]),
-    output_log_spec("~n~n I am MapData: ~n~n",[]),
+    %output_log_spec("~n~n I am MapData: ~n~n",[]),
 
     {reply, Res, MapData};
 
@@ -141,19 +141,17 @@ handle_call(_Request, _From, State) ->
 
 handle_cast({store, Name, Node, Seq1, L}, MapData) ->
  
-    output_log("hera_data:store is being handled by handle_cast!~n",[]),
+    %output_log("hera_data:store is being handled by handle_cast!~n",[]),
     
-    case Name of 
-        e11 -> 
-            output_log_spec("hera_data:store is being handled by handle_cast!~n",[]);
-        _ ->
-            ok
-    end,
+    %case Name of 
+    %    e11 -> 
+    %        output_log_spec("hera_data:store is being handled by handle_cast!~n",[]);
+    %    _ ->
+    %        ok
+    %end,
 
     MapNode0 = maps:get(Name, MapData, #{}),
     IsLogger = application:get_env(hera, log_data, false), 
-    % Here, due to the fact that we defined true in the configuration files, IsLogger should be true.
-    % io:format("IsLogger is ~p~n~n~n", [IsLogger]),
     MapNode1 = if
         is_map_key(Node, MapNode0) ->
             MapNode0;
@@ -171,7 +169,7 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             % For debugging purposes.
             case Name of 
                 e11 -> 
-                    output_log_spec("BEFORE: hera_data:handle_cast is calling log_data for ~p.~n",[L]);
+                    %output_log_spec("BEFORE: hera_data:handle_cast is calling log_data for ~p.~n",[L]);
                 _ ->
                     ok
             end,
@@ -180,10 +178,10 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
             case Name of 
                 e11 -> 
-                    output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
+                    %output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
                     MemoryInfo = erlang:memory(),
 
-                    output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
+                    %output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
                 _ ->
                     ok
             end,
@@ -211,25 +209,25 @@ file_name(Name, Node) ->
 log_data(_, _, false) ->
 
     % For debugging purposes.
-    output_log("FALSE VERSION of hera_data:log_data has been reached!~n",[]),
+    %output_log("FALSE VERSION of hera_data:log_data has been reached!~n",[]),
 
     ok;
 
 log_data(File, {Seq, T, Ms}, true) ->
 
     % For debugging purposes.
-    output_log("hera_data:log_data has been reached!~n",[]),
+    %output_log("hera_data:log_data has been reached!~n",[]),
 
     Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
     S = string:join(Vals, ","),
     Bytes = io_lib:format("~p,~p,~s~n", [Seq, T, S]),
 
     % For debugging purposes.
-    output_log("hera_data:log_data should be verifying that measures/ exists or will create it!~n",[]),
+    %output_log("hera_data:log_data should be verifying that measures/ exists or will create it!~n",[]),
 
     ok = filelib:ensure_dir("measures/"),
 
     % For debugging purposes.
-    output_log("hera_data:log_data should be writting!~n",[]),
+    %output_log("hera_data:log_data should be writting!~n",[]),
 
     ok = file:write_file(File, Bytes, [append]).
