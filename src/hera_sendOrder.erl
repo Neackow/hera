@@ -33,7 +33,8 @@ start_link() ->
 %% Synchronous call: sets the new state according to the detected movement. This function is called by rpc:call on the other GRiSP. 
 set_state_crate(MovementDetected) -> 
     if(MovementDetected == testRPC) ->
-        grisp_led:color(1,white);
+        grisp_led:color(1,white),
+        grisp_led:color(2,black);
         true ->
             ok
     end,
