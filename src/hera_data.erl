@@ -176,15 +176,15 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
 
             log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
 
-            case Name of 
-                e11 -> 
-                    %output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
-                    MemoryInfo = erlang:memory(),
+            %case Name of 
+            %    e11 -> 
+            %        output_log_spec("AFTER: hera_data:handle_cast finished log_data for ~p.~n",[L]),
+            %        MemoryInfo = erlang:memory(),
 
-                    %output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
-                _ ->
-                    ok
-            end,
+            %        output_log_spec("Memory state: ~p. ~n", [MemoryInfo]);
+            %    _ ->
+            %        ok
+            %end,
 
             NewData = Data#data{seq=Seq1,values=L,timestamp=T},
             maps:put(Node, NewData, MapNode1);
