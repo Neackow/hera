@@ -18,7 +18,7 @@
 % At initialisation (see init/1 function): currentSpeed = 100 RPM (in forward direction). 
 % movName: store the movement name as detected by the GRiSP board. 
 % movMode: this is to deal with submodes. E.g.: if I want to be in 'changeSpeed mode', then it stores this mode. 
-% By default: noMove and normal, normal being the 'no movement mode currently'.
+% By default: stopCrate and normal, normal being the 'no movement mode currently'.
 -record(movState, {currentSpeed, movName, movMode}).
 
 
@@ -59,7 +59,7 @@ order_crate(State) ->
     Order = case State#movState.movMode of
         changeSpeed ->
             case State#movState.movName of
-                noMove ->   % Stop the crate from whatever it was doing. Reset values to baseline.
+                stopCrate ->   % Stop the crate from whatever it was doing. Reset values to baseline.
                     NewState = State#movState{currentSpeed = 100},
                     [0,1,0,0,0];
                 accelerate ->   % When we are changing the speed, do not move the crate, by default. Just change the state.
@@ -97,7 +97,7 @@ order_crate(State) ->
         normal ->
             NewState = State,
             case State#movState.movName of
-                noMove ->   % Default command, crate does not move.
+                stopCrate ->   % Default command, crate does not move.
                     [0,1,0,0,0];
                 forward ->
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
@@ -162,17 +162,17 @@ init([]) ->
     grisp_led:color(1,aqua),
     grisp_led:color(2,yellow),
     % Set default state and return {ok, state}.
-    {ok, #movState{currentSpeed = 100, movName = noMove, movMode = normal}}.
+    {ok, #movState{currentSpeed = 100, movName = stopCrate, movMode = normal}}.
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
     Available = read_i2c(),
     %Available = 1,
     if Available == 1 ->
         if MovementDetected == changeSpeed -> 
-            NewState = State#movState{movName = noMove, movMode = changeSpeed}; 
+            NewState = State#movState{movName = stopCrate, movMode = changeSpeed}; 
             % When entering changeSpeed mode, stop the crate. It allows easy reset of the changeSpeed mode, in case the user is lost.
         MovementDetected == exitChangeSpeed ->
-            NewState = State#movState{movName = noMove, movMode = normal};
+            NewState = State#movState{movName = stopCrate, movMode = normal};
             % When exiting changeSpeed mode, stop the crate, once again for security measures. 
         true ->
             NewState = State#movState{movName = MovementDetected}
