@@ -101,7 +101,11 @@ order_crate(State) ->
                     [0,1,0,0,0];
                 forward ->
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
+                keepForward -> % First implementation: when we keep the board up, we detect this move, and keep going.
+                    [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
                 backward ->
+                    [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
+                keepBackward ->
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
                 turnLeftForward ->
                     [0,1,State#movState.currentSpeed,0,2];
