@@ -54,14 +54,14 @@ set_state_crate(MovementDetected) ->
 % The command indicator allows the controller to know if it's turning, simply moving forward, etc.
 % This could have been simply implemented within the controller by comparing speeds, etc. but since it was needed in changeSpeed mode to try it out,
 % it may aswell be reused for simplicity.
-% command_indicator = 0 -> nothing special, execute order ; 1 -> test speed in changeSpeed mode ; 2 -> crate-on-wheels turning ; 3 -> turning around.
+% command_indicator = 0 -> nothing special, execute order ; 1 -> test speed in changeSpeed mode ; 2 -> crate-on-wheels stopping ; 3 -> turning around.
 order_crate(State) ->
     Order = case State#movState.movMode of
         changeSpeed ->
             case State#movState.movName of
                 stopCrate ->   % Stop the crate from whatever it was doing. Reset values to baseline.
                     NewState = State#movState{currentSpeed = 100},
-                    [0,1,0,0,0];
+                    [0,1,0,0,2];
                 accelerate ->   % When we are changing the speed, do not move the crate, by default. Just change the state.
                     if State#movState.currentSpeed == 100 ->
                         NewState = State#movState{currentSpeed = 120};
@@ -98,7 +98,7 @@ order_crate(State) ->
             NewState = State,
             case State#movState.movName of
                 stopCrate ->   % Default command, crate does not move.
-                    [0,1,0,0,0];
+                    [0,1,0,0,2];
                 forward ->
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
                 keepForward -> % First implementation: when we keep the board up, we detect this move, and keep going.
@@ -120,12 +120,12 @@ order_crate(State) ->
                     [100,1,100,1,3]; % Turn on itself, towards the right. Fixed at 100 RPM, could be less, could be fixed to currentSpeed.
                 _ -> 
                     io:format("Unknown movement name while in movMode normal.~n"),
-                    [0,1,0,0,0]
+                    [0,1,0,0,2]
             end;
         _ ->
             NewState = State,
             io:format("Bad movement mode, crate will not move as a security measure."),
-            [0,1,0,0,0]
+            [0,1,0,0,2]
     end,
 
     % Send command to the micro-controller.
