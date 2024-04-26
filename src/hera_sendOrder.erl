@@ -199,13 +199,13 @@ handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed 
                 NewState = State#movState{prevName = forward, movName = stopCrate}; % Stop the crate.
             true ->
                 NewState = State#movState{movName = MovementDetected}
-            end,
+            end;
         movementComparison(MovementDetected,8) == "backward" -> % Same as priori condition, but the other way around.
             if movementComparison(State#movState.prevName,7) == "forward" ->
                 NewState = State#movState{prevName = backward, movName = stopCrate};
             true ->
                 NewState = State#movState{movName = MovementDetected}
-            end,
+            end;
         true ->
             NewState = State#movState{movName = MovementDetected}
         end,
