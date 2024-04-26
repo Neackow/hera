@@ -130,6 +130,7 @@ order_crate(State) ->
                     io:format("*briiight eyes* EVERY NOW AND THEN I FALL APART!~n"),
                     [100,1,100,1,3]; % Turn on itself, towards the right. Fixed at 100 RPM, could be less.
                 _ -> 
+                    NewState = State,
                     io:format("Unknown movement name while in movMode normal.~n"),
                     [0,1,0,0,2]
             end;
