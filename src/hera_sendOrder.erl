@@ -186,6 +186,8 @@ init([]) ->
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
     Available = read_i2c(),
+    SuffixMovement = movementComparison(MovementDetected,7),    % This can't be used as a guard. So, define variable outside.
+    PreviousSuffix = movementComparison(MovementDetected,7),    % Only on 7 letters, so as to not double everything.
     if Available == 1 ->
         if MovementDetected == changeSpeed -> 
             NewState = State#movState{prevName = changeSpeed, movName = stopCrate, movMode = changeSpeed}; 
@@ -194,14 +196,14 @@ handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed 
         MovementDetected == exitChangeSpeed ->
             NewState = State#movState{prevName = exitChangeSpeed, movName = stopCrate, movMode = normal};
             % When exiting changeSpeed mode, stop the crate, once again for security measures. 
-        movementComparison(MovementDetected,7) == "forward" ->  % If the previous move said "forward"...
-            if movementComparison(State#movState.prevName,8) == "backward" -> % And that now, we would like to go "backward"...
+        SuffixMovement == "forward" ->  % If the previous move said "forward"...
+            if PreviousSuffix == "backwar" -> % And that now, we would like to go "backward"...
                 NewState = State#movState{prevName = forward, movName = stopCrate}; % Stop the crate.
             true ->
                 NewState = State#movState{movName = MovementDetected}
             end;
-        movementComparison(MovementDetected,8) == "backward" -> % Same as priori condition, but the other way around.
-            if movementComparison(State#movState.prevName,7) == "forward" ->
+        SuffixMovement == "backwar" -> % Same as priori condition, but the other way around.
+            if PreviousSuffix == "forward" ->
                 NewState = State#movState{prevName = backward, movName = stopCrate};
             true ->
                 NewState = State#movState{movName = MovementDetected}
