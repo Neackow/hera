@@ -16,10 +16,11 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
 % At initialisation (see init/1 function): currentSpeed = 100 RPM (in forward direction). 
+% prevName: used to forbid going from a movement forward to backward, or vice-versa. Set at stopCrate, by default.
 % movName: store the movement name as detected by the GRiSP board. 
 % movMode: this is to deal with submodes. E.g.: if I want to be in 'changeSpeed mode', then it stores this mode. 
 % By default: stopCrate and normal, normal being the 'no movement mode currently'.
--record(movState, {currentSpeed, movName, movMode}).
+-record(movState, {currentSpeed, prevName, movName, movMode}).
 
 
 % =======================================================================
@@ -95,28 +96,37 @@ order_crate(State) ->
                     [0,1,0,0,2] % When order is invalid, automatically set to 0. Send to "slow down to 0", we stop the crate.
             end;
         normal ->
-            NewState = State,
             case State#movState.movName of
                 stopCrate ->   % Default command, crate does not move.
+                    NewState = State#movState{prevName = stopCrate},
                     [0,1,0,0,2];
                 forward ->
+                    NewState = State#movState{prevName = forward},
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
-                keepForward -> % First implementation: when we keep the board up, we detect this move, and keep going.
+                forwardKeep -> % First implementation: when we keep the board up, we detect this move, and keep going.
+                    NewState = State#movState{prevName = forward}, 
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
                 backward ->
+                    NewState = State#movState{prevName = backward},
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
-                keepBackward ->
+                backwardKeep ->
+                    NewState = State#movState{prevName = backward},
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
-                turnLeftForward ->
+                forwardTurnLeft ->
+                    NewState = State#movState{prevName = forward},
                     [90,1,110,0,0]; % When turning, we stay in "continuous" mode, an a dedicated function will adapt the speeds.
                     % The speeds are fixed. This is a design choice, to have a slow turn, to keep as much control on the crate as possible.
-                turnRightForward ->
+                forwardTurnRight ->
+                    NewState = State#movState{prevName = forward},
                     [110,1,90,0,0];
-                turnLeftBackward ->
+                backwardTurnleft ->
+                    NewState = State#movState{prevName = backward},
                     [90,0,110,1,0];
-                turnRightBackward ->
+                backwardTurnRight ->
+                    NewState = State#movState{prevName = backward},
                     [110,0,90,1,0];
                 turnAround ->
+                    NewState = State#movState{prevName = turnAround},
                     io:format("*briiight eyes* EVERY NOW AND THEN I FALL APART!~n"),
                     [100,1,100,1,3]; % Turn on itself, towards the right. Fixed at 100 RPM, could be less.
                 _ -> 
@@ -149,6 +159,11 @@ read_i2c() ->
     io:format("Message received is ~p~n", [Message]),
     Available = lists:nth(1, binary_to_list(lists:nth(1, Message))). % Convert the binary coded on 8 bits and received as [<<val>>] to an integer.
     
+% Reads the first 'Nbr' of letters from the Movement variable.
+movementComparison(Movement,Nbr) ->
+    NewList = atom_to_list(Movement),
+    lists:sublist(NewList,1,Nbr).
+
 
 % =======================================================================
 % ======================== </private functions> =========================
@@ -167,18 +182,30 @@ init([]) ->
     grisp_led:color(1,aqua),
     grisp_led:color(2,yellow),
     % Set default state and return {ok, state}.
-    {ok, #movState{currentSpeed = 100, movName = stopCrate, movMode = normal}}.
+    {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
     Available = read_i2c(),
-    %Available = 1,
     if Available == 1 ->
         if MovementDetected == changeSpeed -> 
-            NewState = State#movState{movName = stopCrate, movMode = changeSpeed}; 
+            NewState = State#movState{prevName = changeSpeed, movName = stopCrate, movMode = changeSpeed}; 
             % When entering changeSpeed mode, stop the crate. It allows easy reset of the changeSpeed mode, in case the user is lost.
+            % We set here that the previous move was changeSpeed, only to do it once at entry and same for exitChangeSpeed.
         MovementDetected == exitChangeSpeed ->
-            NewState = State#movState{movName = stopCrate, movMode = normal};
+            NewState = State#movState{prevName = exitChangeSpeed, movName = stopCrate, movMode = normal};
             % When exiting changeSpeed mode, stop the crate, once again for security measures. 
+        movementComparison(MovementDetected,7) == "forward" ->  % If the previous move said "forward"...
+            if movementComparison(State#movState.prevName,8) == "backward" -> % And that now, we would like to go "backward"...
+                NewState = State#movState{prevName = forward, movName = stopCrate}; % Stop the crate.
+            true ->
+                NewState = State#movState{movName = MovementDetected}
+            end,
+        movementComparison(MovementDetected,8) == "backward" -> % Same as priori condition, but the other way around.
+            if movementComparison(State#movState.prevName,7) == "forward" ->
+                NewState = State#movState{prevName = backward, movName = stopCrate};
+            true ->
+                NewState = State#movState{movName = MovementDetected}
+            end,
         true ->
             NewState = State#movState{movName = MovementDetected}
         end,
