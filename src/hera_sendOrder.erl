@@ -32,7 +32,7 @@ start_link() ->
 
 %% Synchronous call: sets the new state according to the detected movement. This function is called by rpc:call on the other GRiSP. 
 set_state_crate(MovementDetected) -> 
-    if(MovementDetected == testRPC) ->
+    if(MovementDetected == testRPC) -> % To test the good connection between the two GRiSPs. Useless otherwise.
         grisp_led:color(1,white),
         grisp_led:color(2,black);
         true ->
@@ -54,7 +54,7 @@ set_state_crate(MovementDetected) ->
 % The command indicator allows the controller to know if it's turning, simply moving forward, etc.
 % This could have been simply implemented within the controller by comparing speeds, etc. but since it was needed in changeSpeed mode to try it out,
 % it may aswell be reused for simplicity.
-% command_indicator = 0 -> nothing special, execute order ; 1 -> test speed in changeSpeed mode ; 2 -> crate-on-wheels stopping ; 3 -> turning around.
+% command_indicator = 0 -> continuous mode, smooth position profile ; 1 -> test speed in changeSpeed mode ; 2 -> crate-on-wheels stopping ; 3 -> turning around.
 order_crate(State) ->
     Order = case State#movState.movMode of
         changeSpeed ->
@@ -92,7 +92,7 @@ order_crate(State) ->
                 _ ->
                     NewState = State,
                     io:format("Invalid command when in changeSpeed mode.~n"),
-                    [0,1,0,0,0] % When order is invalid, automatically set to 0.
+                    [0,1,0,0,2] % When order is invalid, automatically set to 0. Send to "slow down to 0", we stop the crate.
             end;
         normal ->
             NewState = State,
@@ -108,16 +108,17 @@ order_crate(State) ->
                 keepBackward ->
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
                 turnLeftForward ->
-                    [0,1,State#movState.currentSpeed,0,2];
+                    [90,1,110,0,0]; % When turning, we stay in "continuous" mode, an a dedicated function will adapt the speeds.
+                    % The speeds are fixed. This is a design choice, to have a slow turn, to keep as much control on the crate as possible.
                 turnRightForward ->
-                    [State#movState.currentSpeed,1,0,0,2];
+                    [110,1,90,0,0];
                 turnLeftBackward ->
-                    [0,0,State#movState.currentSpeed,1,2];
+                    [90,0,110,1,0];
                 turnRightBackward ->
-                    [State#movState.currentSpeed,0,0,1,2];
+                    [110,0,90,1,0];
                 turnAround ->
                     io:format("*briiight eyes* EVERY NOW AND THEN I FALL APART!~n"),
-                    [100,1,100,1,3]; % Turn on itself, towards the right. Fixed at 100 RPM, could be less, could be fixed to currentSpeed.
+                    [100,1,100,1,3]; % Turn on itself, towards the right. Fixed at 100 RPM, could be less.
                 _ -> 
                     io:format("Unknown movement name while in movMode normal.~n"),
                     [0,1,0,0,2]
