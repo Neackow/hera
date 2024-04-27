@@ -151,13 +151,14 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
     %end,
 
     MapNode0 = maps:get(Name, MapData, #{}),
-    IsLogger = application:get_env(hera, log_data, false), 
+    %IsLogger = application:get_env(hera, log_data, false), % Old version: was laggy and caused problems.
+    IsLogger = application:get_env(hera, log_BL, false),    % New version: call the function buffered_logger.
     MapNode1 = if
         is_map_key(Node, MapNode0) ->
             MapNode0;
-        IsLogger ->
-            File = file_name(Name, Node),
-            MapNode0#{Node => #data{file=File}};
+        %IsLogger ->
+        %    File = file_name(Name, Node),
+        %    MapNode0#{Node => #data{file=File}};
         true ->
             MapNode0#{Node => #data{}}
     end,
@@ -174,7 +175,8 @@ handle_cast({store, Name, Node, Seq1, L}, MapData) ->
             %        ok
             %end,
 
-            log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Eventually, this seems to write to the csv.
+            %log_data(Data#data.file, {Seq1, T, L}, IsLogger),       % Old version.
+            use_buffered_logger(Name, {Seq1, T, L}, IsLogger),
 
             %case Name of 
             %    e11 -> 
@@ -206,28 +208,30 @@ file_name(Name, Node) ->
         ["measures/", atom_to_list(Name), "_", atom_to_list(Node), ".csv"]).
 
 
+%%% OLD VERSION OF LOGGER %%%
 log_data(_, _, false) ->
-
     % For debugging purposes.
     %output_log("FALSE VERSION of hera_data:log_data has been reached!~n",[]),
-
     ok;
 
 log_data(File, {Seq, T, Ms}, true) ->
 
     % For debugging purposes.
     %output_log("hera_data:log_data has been reached!~n",[]),
-
     Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
     S = string:join(Vals, ","),
     Bytes = io_lib:format("~p,~p,~s~n", [Seq, T, S]),
-
     % For debugging purposes.
     %output_log("hera_data:log_data should be verifying that measures/ exists or will create it!~n",[]),
-
     ok = filelib:ensure_dir("measures/"),
-
     % For debugging purposes.
     %output_log("hera_data:log_data should be writting!~n",[]),
-
     ok = file:write_file(File, Bytes, [append]).
+
+
+%%% NEW VERSION OF LOGGER %%%
+use_buffered_logger(_,_,false) ->
+    ok;
+
+use_buffered_logger(Name, {Seq, T, Ms}, true) ->
+    buffered_logger:store_record(Name,{Seq, T, Ms}).
