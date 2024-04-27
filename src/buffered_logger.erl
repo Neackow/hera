@@ -10,7 +10,9 @@ start_link(Arguments) ->
     % Arguments must have the form {BufferSize = 10}
     gen_server:start_link({local, ?MODULE}, ?MODULE, Arguments, []).
 
-% ========================= <public functions> =========================
+% =======================================================================
+% ========================= <public functions> ==========================
+% =======================================================================
 
 print_all_contents() ->
     gen_server:call(?MODULE, {print_all_content}).
@@ -18,9 +20,14 @@ print_all_contents() ->
 store_record(TableName, Record) ->
     gen_server:call(?MODULE, {store, TableName, Record}).
 
+% =======================================================================
 % ========================= </public functions> =========================
+% =======================================================================
 
+
+% =======================================================================
 % ========================= <private functions> =========================
+% =======================================================================
 
 create_subtable(SubTableName) ->
     ets:new(SubTableName, [ordered_set]).
@@ -71,20 +78,25 @@ save_data_to_file(TableName, SubTable) ->
     ok = file:write_file(FileName, Content, [append]),
     ok.
 
-% ========================= </private functions> =========================
+% =======================================================================
+% ========================= </private functions> ========================
+% =======================================================================
 
-% ========================= <gen_server functions> =========================
+
+% =======================================================================
+% ======================== <gen_server functions> =======================
+% =======================================================================
 
 init(Arguments) ->
-    % create a 'root' table that will store sub-tables
-    % inistialize the State with default values
+    % Create a 'root' table that will store sub-tables
+    % Initialize the State with default values
 
     {MaxBufferSize} = Arguments,
     process_flag(trap_exit, true), % Needed for the flushing when crash down of the app.
     NewRootTable = ets:new(buffered_logger_root,[set, private]),
-    % display success message
+    % Display success message
     io:format("Root table: ~p; max buffer size: ~p.~n",[NewRootTable, MaxBufferSize]),
-    % return initial state
+    % Return initial state
     {ok, #stateBL{internal_counter = 0, max_buffer_size = MaxBufferSize, root_table = NewRootTable}}.
 
 % When storing the current content in a file.
@@ -94,25 +106,25 @@ storeAndEmptyDictionary(RootTable, SubTable, TableName) ->
     ets:delete(RootTable, TableName).
 
 handle_call({store, TableName, Record}, From, State = #stateBL{internal_counter=InternalCounter, max_buffer_size=MaxBufferSize, root_table=RootTable}) ->
-    % search for TableName in stored tables
+    % Search for TableName in stored tables
     Match = ets:lookup(RootTable, TableName),
     SubTable = 
         if Match =:= [] ->
-            % the TableName was not created
+            % The TableName was not created
             LocalSubTable = create_subtable(TableName),
             insert_data(RootTable, TableName, LocalSubTable),
             LocalSubTable;
         true ->
-            % the TableName already exists
+            % The TableName already exists
             {_, ExistingSubTable} = lists:nth(1, Match),
             ExistingSubTable
     end,
 
-    % the counter is shared between subtables to keep evolution
+    % The counter is shared between subtables to keep evolution
     NewCounter = InternalCounter + 1,
     insert_data(SubTable, NewCounter, Record),
 
-    % if the sub-table size is > max_buffer_size, store the content on disk and delete from memory
+    % If the sub-table size is > max_buffer_size, store the content on disk and delete from memory
 
     SubTableSize = ets:info(SubTable, size),
     %io:format("~p size: ~p.~n",[TableName, SubTableSize]),
@@ -124,7 +136,7 @@ handle_call({store, TableName, Record}, From, State = #stateBL{internal_counter=
             ok
     end,
 
-    % return the updated state
+    % Return the updated state
 
     {reply, ok, #stateBL{internal_counter = NewCounter, max_buffer_size = MaxBufferSize, root_table = RootTable}};
 
@@ -148,8 +160,8 @@ terminate(normal, S) ->
     io:format("Buffered_logger: normal termination~n",[]);
 
 terminate(shutdown, State = #stateBL{internal_counter=InternalCounter, max_buffer_size = MaxBufferSize, root_table=RootTable}) ->
-    % terminating
-    % store each remaining dictionary on disk
+    % Terminating
+    % Store each remaining dictionary on disk
     io:format("Buffered_logger: managing shutdown~n",[]),
     TableList = ets:tab2list(RootTable),
     lists:foreach(fun(LocDictionaryEntry) ->
@@ -160,5 +172,6 @@ terminate(shutdown, State = #stateBL{internal_counter=InternalCounter, max_buffe
 terminate(Reason, S) ->
     io:format("Buffered_logger: other termination", [Reason]).
 
-% ========================= </gen_server functions> =========================
-
+% =======================================================================
+% ======================= </gen_server functions> =======================
+% =======================================================================
