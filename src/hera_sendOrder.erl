@@ -50,7 +50,6 @@ set_state_crate(MovementDetected) ->
 % ========================= <private functions> =========================
 % =======================================================================
 
-
 % Structure of Order: [V1, DIR1, V2, DIR2, command_indicator].
 % The command indicator allows the controller to know if it's turning, simply moving forward, etc.
 % This could have been simply implemented within the controller by comparing speeds, etc. but since it was needed in changeSpeed mode to try it out,
@@ -187,8 +186,8 @@ init([]) ->
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
     Available = read_i2c(),
-    SuffixMovement = movementComparison(MovementDetected,7),    % This can't be used as a guard. So, define variable outside.
-    PreviousSuffix = movementComparison(MovementDetected,7),    % Only on 7 letters, so as to not double everything.
+    SuffixMovement = movementComparison(MovementDetected,7),        % This can't be used as a guard. So, define variable outside.
+    PreviousSuffix = movementComparison(State#movState.prevName,7), % Only on 7 letters, so as to not double everything.
     if Available == 1 ->
         if MovementDetected == changeSpeed -> 
             NewState = State#movState{prevName = changeSpeed, movName = stopCrate, movMode = changeSpeed}; 
@@ -197,7 +196,7 @@ handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed 
         MovementDetected == exitChangeSpeed ->
             NewState = State#movState{prevName = exitChangeSpeed, movName = stopCrate, movMode = normal};
             % When exiting changeSpeed mode, stop the crate, once again for security measures. 
-        SuffixMovement == "forward" ->  % If the previous move said "forward"...
+        SuffixMovement == "forward" ->  % If the current move says "forward"...
             if PreviousSuffix == "backwar" -> % And that now, we would like to go "backward"...
                 NewState = State#movState{prevName = forward, movName = stopCrate}; % Stop the crate.
             true ->
