@@ -53,7 +53,7 @@ set_state_crate(MovementDetected) ->
 % ========================= <private functions> =========================
 % =======================================================================
 
-% Checking if the other board is still answering. This is a safety measure, a guard-rail.
+% Checking if the other board is still answering and available to send orders. This is a safety measure, a guard-rail.
 checkingConnection(Counter) ->
     if net_adm:ping(sensor_fusion@nav_1) == pang ->
         NewCounter = Counter#counter{value = Counter#counter.value + 1};
