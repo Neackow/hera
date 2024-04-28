@@ -195,6 +195,7 @@ measure(State=#state{name=N, mod=M, mod_state=MS, seq=Seq, iter=Iter}) ->
             % For debugging purposes.
             %output_log("Sending to hera_com from hera_measure!~n",[]),
 
+            % Case ... of added for debugging purposes. Basically useless otherwise, see original version from Sébastien Kalbusch.
             case M of
                 nav3 ->
                     hera_com:send(N, Seq, Vals);

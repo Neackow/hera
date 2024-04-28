@@ -22,6 +22,9 @@
 % By default: stopCrate and normal, normal being the 'no movement mode currently'.
 -record(movState, {currentSpeed, prevName, movName, movMode}).
 
+% At initialisation, this counter is set to 0 and the function verifying that the other node is connected is launched.
+-record(counter, {value = 0}).
+
 
 % =======================================================================
 % ========================= <public functions> ==========================
@@ -49,6 +52,23 @@ set_state_crate(MovementDetected) ->
 % =======================================================================
 % ========================= <private functions> =========================
 % =======================================================================
+
+% Checking if the other board is still answering. This is a safety measure, a guard-rail.
+checkingConnection(Counter) ->
+    if net_adm:ping(sensor_fusion@nav_1) == pang ->
+        NewCounter = Counter#counter{value = Counter#counter.value + 1};
+    true ->
+        NewCounter = Counter#counter{value = 0}
+    end,
+    
+    if Counter#counter.value == 3 ->
+        send_i2c([0,1,0,0,2]), % Stop the crate.
+        NewCounter = Counter#counter{value = 0};
+    true ->
+        NewCounter = Counter
+    end,
+    timer:apply_after(1000, hera_sendOrder, checkingConnection, [NewCounter]).
+
 
 % Structure of Order: [V1, DIR1, V2, DIR2, command_indicator].
 % The command indicator allows the controller to know if it's turning, simply moving forward, etc.
@@ -153,6 +173,7 @@ send_i2c(Command) ->
     grisp_i2c:transfer(I2C0, [{write, 16#40, 1, List_data}]), % 16#40 is the fixed address of the Raspberry Pi Pico W, in hexadecimal format.
     io:format("Command sent to the micro-controller!~n").
 
+% Read from the controller if we are avaiable or not.
 read_i2c() ->
     I2C1 = grisp_i2c:open(i2c1),
     Message = grisp_i2c:transfer(I2C1, [{read, 16#40, 1, 1}]), % Reads 1 byte from slave at address 0x40, in register 1.
@@ -181,7 +202,9 @@ init([]) ->
     % Change LED colors: allow to visually tell if the process has been launched, or not.
     grisp_led:color(1,aqua),
     grisp_led:color(2,yellow),
-    % Set default state and return {ok, state}.
+    % Initialise the counter and launch the function immediately.
+    checkingConnection(Counter = #counter{}),
+    % Set default state and return {ok, state}. State is the internal state of the gen_server.
     {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
