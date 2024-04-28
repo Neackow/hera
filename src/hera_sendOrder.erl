@@ -203,7 +203,7 @@ init([]) ->
     grisp_led:color(1,aqua),
     grisp_led:color(2,yellow),
     % Initialise the counter and launch the function immediately.
-    checkingConnection(Counter = #counter{}),
+    %checkingConnection(Counter = #counter{}),
     % Set default state and return {ok, state}. State is the internal state of the gen_server.
     {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
