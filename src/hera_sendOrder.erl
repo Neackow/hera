@@ -55,7 +55,8 @@ set_state_crate(MovementDetected) ->
 
 % Checking if the other board is still answering and available to send orders. This is a safety measure, a guard-rail.
 checkingConnection(Counter) ->
-    if net_adm:ping(sensor_fusion@nav_1) == pang ->
+    Connected = net_adm:ping(sensor_fusion@nav_1),
+    if Connected == pang ->
         NewCounter = Counter#counter{value = Counter#counter.value + 1};
     true ->
         NewCounter = Counter#counter{value = 0}
