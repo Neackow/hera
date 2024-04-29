@@ -63,10 +63,6 @@ file_name(Name) ->
 % Acc = accumulator. SubTable is the sub-directory containing the log, to be added to the file. TableName = name given to SubTable, used for filename.
 save_data_to_file(TableName, SubTable) ->
 
-    Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
-    S = string:join(Vals, ","),
-    Bytes = io_lib:format("~p,~p,~s~n", [Seq, T, S]),
-
     Content = ets:foldl(fun({Key, Values}, Acc) -> % Here: format the data as before. Values is of the format {Seq, T, Ms} -> use pattern matching.
         {Seq, T, Ms} = Values,
         Vals = lists:map(fun(V) -> lists:flatten(io_lib:format("~p", [V])) end, Ms),
