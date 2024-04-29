@@ -123,13 +123,7 @@ order_crate(State) ->
                 forward ->
                     NewState = State#movState{prevName = forward},
                     [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
-                forwardKeep -> % First implementation: when we keep the board up, we detect this move, and keep going.
-                    NewState = State#movState{prevName = forward}, 
-                    [State#movState.currentSpeed,1,State#movState.currentSpeed,0,0];
                 backward ->
-                    NewState = State#movState{prevName = backward},
-                    [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
-                backwardKeep ->
                     NewState = State#movState{prevName = backward},
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
                 forwardTurnLeft ->
