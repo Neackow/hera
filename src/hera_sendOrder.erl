@@ -47,8 +47,6 @@ set_state_crate(MovementDetected) ->
 % Checking if the other board is still answering and available to send orders. This is a safety measure, a guard-rail.
 % Has to be public in order to be called by apply_after.
 checkingConnection(Counter) ->
-    io:format("Pinging the GRiSP nav_1...~n"),
-    io:format("Current value of the counter: ~p.~n", [Counter#counter.value]),
     Connected = net_adm:ping(sensor_fusion@nav_1),
     if Connected == pang ->
         NewCounter = Counter#counter{value = Counter#counter.value + 1};
@@ -57,7 +55,6 @@ checkingConnection(Counter) ->
     end,
     
     if NewCounter#counter.value == 2 ->
-        io:format("I waited nav_1 for too long.~n"),
         send_i2c([0,1,0,0,2]), % Stop the crate.
         FinalCounter = Counter#counter{value = 0};
     true ->
@@ -202,7 +199,6 @@ init([]) ->
     grisp_led:color(2,yellow),
     % Initialise the counter and launch the function immediately.
     checkingConnection(Counter = #counter{}),
-    io:format("We are past checkingConnection!~n"),
     % Set default state and return {ok, state}. State is the internal state of the gen_server.
     {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
