@@ -12,7 +12,7 @@
 -behaviour(gen_server).
 
 
--export([start_link/0, set_state_crate/1]).
+-export([start_link/0, set_state_crate/1, checkingConnection/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
 
 % At initialisation (see init/1 function): currentSpeed = 100 RPM (in forward direction). 
@@ -44,16 +44,8 @@ set_state_crate(MovementDetected) ->
     end,
     gen_server:call(?MODULE, {ctrlCrate, MovementDetected}).
 
-% =======================================================================
-% ========================= </public functions> =========================
-% =======================================================================
-
-
-% =======================================================================
-% ========================= <private functions> =========================
-% =======================================================================
-
 % Checking if the other board is still answering and available to send orders. This is a safety measure, a guard-rail.
+% Has to be public in order to be called by apply_after.
 checkingConnection(Counter) ->
     io:format("Pinging the GRiSP nav_1...~n"),
     io:format("Current value of the counter: ~p.~n", [Counter#counter.value]),
@@ -69,10 +61,18 @@ checkingConnection(Counter) ->
         send_i2c([0,1,0,0,2]), % Stop the crate.
         FinalCounter = Counter#counter{value = 0};
     true ->
-        FinalCounter = Counter
+        FinalCounter = NewCounter
     end,
     timer:apply_after(1000, hera_sendOrder, checkingConnection, [FinalCounter]).
 
+% =======================================================================
+% ========================= </public functions> =========================
+% =======================================================================
+
+
+% =======================================================================
+% ========================= <private functions> =========================
+% =======================================================================
 
 % Structure of Order: [V1, DIR1, V2, DIR2, command_indicator].
 % The command indicator allows the controller to know if it's turning, simply moving forward, etc.
