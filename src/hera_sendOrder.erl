@@ -62,13 +62,13 @@ checkingConnection(Counter) ->
         NewCounter = Counter#counter{value = 0}
     end,
     
-    if Counter#counter.value == 3 ->
+    if NewCounter#counter.value == 3 ->
         send_i2c([0,1,0,0,2]), % Stop the crate.
-        NewCounter = Counter#counter{value = 0};
+        FinalCounter = Counter#counter{value = 0};
     true ->
-        NewCounter = Counter
+        FinalCounter = Counter
     end,
-    timer:apply_after(1000, hera_sendOrder, checkingConnection, [NewCounter]).
+    timer:apply_after(1000, hera_sendOrder, checkingConnection, [FinalCounter]).
 
 
 % Structure of Order: [V1, DIR1, V2, DIR2, command_indicator].
@@ -128,17 +128,17 @@ order_crate(State) ->
                     [State#movState.currentSpeed,0,State#movState.currentSpeed,1,0];
                 forwardTurnLeft ->
                     NewState = State#movState{prevName = forward},
-                    [90,1,110,0,0]; % When turning, we stay in "continuous" mode, an a dedicated function will adapt the speeds.
+                    [80,1,110,0,0]; % When turning, we stay in "continuous" mode, an a dedicated function will adapt the speeds.
                     % The speeds are fixed. This is a design choice, to have a slow turn, to keep as much control on the crate as possible.
                 forwardTurnRight ->
                     NewState = State#movState{prevName = forward},
-                    [110,1,90,0,0];
+                    [110,1,80,0,0];
                 backwardTurnleft ->
                     NewState = State#movState{prevName = backward},
-                    [90,0,110,1,0];
+                    [80,0,110,1,0];
                 backwardTurnRight ->
                     NewState = State#movState{prevName = backward},
-                    [110,0,90,1,0];
+                    [110,0,80,1,0];
                 turnAround ->
                     NewState = State#movState{prevName = turnAround},
                     io:format("*briiight eyes* EVERY NOW AND THEN I FALL APART!~n"),
@@ -198,7 +198,7 @@ init([]) ->
     grisp_led:color(1,aqua),
     grisp_led:color(2,yellow),
     % Initialise the counter and launch the function immediately.
-    %checkingConnection(Counter = #counter{}),
+    checkingConnection(Counter = #counter{}),
     % Set default state and return {ok, state}. State is the internal state of the gen_server.
     {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
