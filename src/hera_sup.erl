@@ -40,9 +40,5 @@ init([]) ->
         id => buffered_logger,
         start => {buffered_logger, start_link, [{200}]} % 200 = number of data to be saved in one go. Each 200 data, save them.
     },
-    HeraI2C = #{
-        id => hera_i2c_communication,
-        start => {hera_i2c_communication, start_link, []}
-    },
-    ChildSpecs = [HeraData, HeraCom, HeraMeasureSup, HeraBufferedLogger, HeraI2C],
+    ChildSpecs = [HeraData, HeraCom, HeraMeasureSup, HeraBufferedLogger],
     {ok, {SupFlags, ChildSpecs}}.

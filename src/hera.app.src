@@ -7,10 +7,10 @@
    [kernel,
     stdlib
    ]},
-  {env, [{log_data, false},{show_log,false},{show_log_spec,false},{log_BL,true}]},
+  {env, [{log_data, false},{show_log,false},{show_log_spec,false},{log_BL,false}]},
   {modules, [hera, hera_sup, hera_data, hera_com,
     	hera_measure_sup, hera_measure, kalman, mat,
-    	hera_sendOrder,hera_sendOrder_sup,buffered_logger, hera_i2c_communication]},
+    	buffered_logger]},
   {licenses, ["Apache 2.0"]},
   {links, []}
  ]}.
