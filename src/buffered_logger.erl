@@ -7,7 +7,7 @@
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
 % Values by default for the state of the buffered_logger.
--record(stateBL, {internal_counter=0, max_buffer_size = 2000, root_table}).
+-record(stateBL, {internal_counter=0, max_buffer_size = 200, root_table}).
 
 
 start_link(Arguments) ->
