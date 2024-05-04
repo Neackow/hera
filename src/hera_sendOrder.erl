@@ -54,8 +54,8 @@ checkingConnection(Counter) ->
         NewCounter = Counter#counter{value = 0}
     end,
     
-    if NewCounter#counter.value == 2 ->
-        send_i2c([0,1,0,0,2]), % Stop the crate.
+    if NewCounter#counter.value == 1 ->
+        hera_i2c_communication:send_data([0,1,0,0,2]), % Stop the crate.
         FinalCounter = Counter#counter{value = 0};
     true ->
         FinalCounter = NewCounter
@@ -155,26 +155,11 @@ order_crate(State) ->
     end,
 
     % Send command to the micro-controller.
-    send_i2c(Order),
+    hera_i2c_communication:send_data(Order),
     io:format("Order is ~p~n", [Order]),
     io:format("Current state is ~p~n", [NewState]),
     NewState.
 
-% Send the command using the I2C ports of the GRiSP. Thank you Cédric Ponsard for this piece of code! 
-% For more details on this port: https://digilent.com/blog/new-i2c-standard-for-pmods/
-send_i2c(Command) ->
-    List_data = lists:flatten(lists:map(fun(X) -> X end, lists:map(fun(X) -> lists:sublist(binary_to_list(term_to_binary(X)),3,8) end, Command))),
-    I2C0 = grisp_i2c:open(i2c1),
-    grisp_i2c:transfer(I2C0, [{write, 16#40, 1, List_data}]), % 16#40 is the fixed address of the Raspberry Pi Pico W, in hexadecimal format.
-    io:format("Command sent to the micro-controller!~n").
-
-% Read from the controller if we are avaiable or not.
-read_i2c() ->
-    I2C1 = grisp_i2c:open(i2c1),
-    Message = grisp_i2c:transfer(I2C1, [{read, 16#40, 1, 1}]), % Reads 1 byte from slave at address 0x40, in register 1.
-    io:format("Message received is ~p~n", [Message]),
-    Available = lists:nth(1, binary_to_list(lists:nth(1, Message))). % Convert the binary coded on 8 bits and received as [<<val>>] to an integer.
-    
 % Reads the first 'Nbr' of letters from the Movement variable.
 movementComparison(Movement,Nbr) ->
     NewList = atom_to_list(Movement),
@@ -203,7 +188,7 @@ init([]) ->
     {ok, #movState{currentSpeed = 100, prevName = stopCrate, movName = stopCrate, movMode = normal}}.
 
 handle_call({ctrlCrate, MovementDetected}, From, State = #movState{currentSpeed = CurrentSpeed, movName = MovName, movMode = MovMode}) ->
-    Available = read_i2c(),
+    Available = hera_i2c_communication:read_data(),
     SuffixMovement = movementComparison(MovementDetected,7),        % This can't be used as a guard. So, define variable outside.
     PreviousSuffix = movementComparison(State#movState.prevName,7), % Only on 7 letters, so as to not double everything.
     if Available == 1 ->
