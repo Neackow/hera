@@ -4,7 +4,7 @@
               {registered,[hera_data,hera_com,hera_measure_sup]},
               {mod,{hera,[]}},
               {applications,[kernel,stdlib]},
-              {env,[{log_data,false},{show_log,false},{show_log_spec,false},{log_BL,false}]},
+              {env,[{log_data,false},{show_log,false},{show_log_spec,false},{log_BL,true}]},
               {modules,[hera,hera_com,hera_data,hera_measure,hera_measure_sup,
                         hera_sup,kalman,mat,
                         hera_sendOrder,hera_sendOrder_sup,buffered_logger,hera_i2c_communication]},

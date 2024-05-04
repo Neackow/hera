@@ -1,10 +1,14 @@
 -module(buffered_logger).
+
+-behaviour(gen_server).
+
+
 -export([start_link/1, store_record/2, print_all_contents/0]).
 -export([init/1, handle_call/3, handle_cast/2, terminate/2]).
 
--record(stateBL, {internal_counter=0, max_buffer_size = 250, root_table}).
+% Values by default for the state of the buffered_logger.
+-record(stateBL, {internal_counter=0, max_buffer_size = 2000, root_table}).
 
--behaviour(gen_server).
 
 start_link(Arguments) ->
     % Arguments must have the form {BufferSize = 10}
