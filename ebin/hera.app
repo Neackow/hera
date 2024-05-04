@@ -7,6 +7,6 @@
               {env,[{log_data,false},{show_log,false},{show_log_spec,false},{log_BL,false}]},
               {modules,[hera,hera_com,hera_data,hera_measure,hera_measure_sup,
                         hera_sup,kalman,mat,
-                        hera_sendOrder,hera_sendOrder_sup,buffered_logger]},
+                        hera_sendOrder,hera_sendOrder_sup,buffered_logger,hera_i2c_communication]},
               {licenses,["Apache 2.0"]},
               {links,[]}]}.

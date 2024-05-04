@@ -46,6 +46,7 @@ set_state_crate(MovementDetected) ->
 
 % Checking if the other board is still answering and available to send orders. This is a safety measure, a guard-rail.
 % Has to be public in order to be called by apply_after.
+% Also, in parallel, "ping" the Rapberry board to tell it the GRiSP is still alive.
 checkingConnection(Counter) ->
     Connected = net_adm:ping(sensor_fusion@nav_1),
     if Connected == pang ->
@@ -60,6 +61,7 @@ checkingConnection(Counter) ->
     true ->
         FinalCounter = NewCounter
     end,
+    hera_i2c_communication:send_data([1]), % We send a 1, which will be added to a counter in the Rasp.
     timer:apply_after(1000, hera_sendOrder, checkingConnection, [FinalCounter]).
 
 % =======================================================================
