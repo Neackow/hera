@@ -170,7 +170,7 @@ terminate(shutdown, State = #stateBL{internal_counter=InternalCounter, max_buffe
             end, TableList);
     
 terminate(Reason, S) ->
-    io:format("Buffered_logger: other termination", [Reason]).
+    io:format("Buffered_logger: other termination: ~p.~n", [Reason]).
 
 % =======================================================================
 % ======================= </gen_server functions> =======================
