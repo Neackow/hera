@@ -101,7 +101,7 @@ init(Arguments) ->
 
 % When storing the current content in a file.
 storeAndEmptyDictionary(RootTable, SubTable, TableName) ->
-    io:format("Storing dictionary on disk: ~p~n",[TableName]),
+    %io:format("Storing dictionary on disk: ~p~n",[TableName]),
     save_data_to_file(TableName, SubTable),
     ets:delete(RootTable, TableName).
 
